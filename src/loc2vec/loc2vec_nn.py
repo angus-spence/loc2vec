@@ -6,6 +6,18 @@ import numpy as np
 import torch
 from torch import nn
 
+loader = Data_Loader(
+    x_path=r'C:\Users\Malcolm\Documents\Scripts\loc2vec\src\loc2vec\test_data',
+    x_pos_path=r'C:\Users\Malcolm\Documents\Scripts\loc2vec\src\loc2vec\test_data',
+    x_neg_path=r'C:\Users\Malcolm\Documents\Scripts\loc2vec\src\loc2vec\test_data',
+    batch_size=120,
+    shuffle=False
+)
+
+loader.load()
+
+quit()
+
 class Network(torch.nn.Module):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
