@@ -1,5 +1,6 @@
 import os
 import time
+import enum
 from dataclasses import dataclass
 
 from torch import nn
@@ -40,8 +41,9 @@ class Data_Loader():
             self.device = torch.device('cuda')
             self.cuda = True
         else: self.device = torch.device('cpu')
+        self.data_dirs = [self.x_path, self.x_pos_path, self.x_neg_path]
 
-    def load_from_dir(self) -> [torch.Tensor, torch.Tensor, torch.Tensor]:
+    def load_from_dirs(self) -> [torch.Tensor, torch.Tensor, torch.Tensor]:
         t = time.gmtime(time.time())
         print(f'Data Loader {t[3]}:{t[4]}:{t[5]} Device: {str(self.device).upper()}\n{os.get_terminal_size()[0] * "-"}')
 
@@ -53,14 +55,43 @@ class Data_Loader():
     def _get_samples(self) -> int:
         if self._check_path(): self.samples = len(os.listdir(self.x_path))
 
-    def _check_path(self) -> bool:
+    def _check_paths(self) -> bool:
+        if (isinstance(i, (str, tuple, list)) for i in self.data_dirs) == (True, True, True): 
+            types = True
+        else: raise TypeError(f'Paths must be str or array-like type: got {(type(i) for i in self.data_dirs)}')
+        if type(self.x_path) is str and type(self.x_pos_path) is str and type(self.x_neg_path) is str: return True
+        elif isinstance(self.x_path, (tuple, list)) == True and isinstance(self.x_pos_path, (tuple, list)) and isinstance(self.x_neg_path, (tuple, list)): return True
+        else: 
+
+    def _check_channels(self) -> bool:
+        if self._check_path_type() == (True, True, True):
+        
+
+    def _check_path_type(self) -> (bool):
         """
         Checks that all paths are valid.
         """
+        return (isinstance(i, str) for i in zip(self.data_dirs))
+
+    def _check_path():
+        self.paths = {}
         for path in [self.x_path, self.x_pos_path, self.x_neg_path]:
+            if isinstance(path, list) or isinstance(path, tuple):
+                d1 = {str(path): [os.listdir(i) for i in path]}
+                self.paths.update(d1)
+            elif isinstance(path, str):
+                d1 = {str(path): path}
+            else:
+                raise TypeError(f'Paths must be str or array-like')
+                    
+        for path in self.paths.values():
             if not os.path.isdir(path):
                 raise ValueError(f'Path {path} is not a valid directory.')
             
+        
+
+
+
         if len(os.listdir(self.x_path)) != len(os.listdir(self.x_pos_path)) or len(os.listdir(self.x_path)) != len(os.listdir(self.x_neg_path)):
             raise ValueError(f'All paths must have the same number of files. Got {len(os.listdir(self.x_path))}, {len(os.listdir(self.x_pos_path))}, {len(os.listdir(self.x_neg_path))}.')
         return True
