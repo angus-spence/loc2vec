@@ -6,6 +6,7 @@ from torch import nn
 import torch, torchvision
 import matplotlib.pyplot as plt
 
+
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 path = r'C:\Users\Malcolm\Documents\Scripts\loc2vec\src\loc2vec\test_data'
 
@@ -14,16 +15,23 @@ path = r'C:\Users\Malcolm\Documents\Scripts\loc2vec\src\loc2vec\test_data'
 
 @dataclass
 class Data_Loader():
+    """
+    Object for loading train and test data for the loc2vec network
+
+    Args:
+        x_path: path of directory with x anchor rasters
+        x_pos_path: path of directory with x positive anchor rasters
+        y_neg_path: path of directory with x negative anchor rasters
+        batch_size: batch size to use in dataloaded
+        channels: number of channels for each anchor index
+        shuffle: shuffle indecies in dataloader
+        tt_split: percentage of training samples 
+    """
     x_path: str
     x_pos_path: str
     x_neg_path: str
     batch_size: int
-    samples: int = None
-    device: str = None
-    cuda: bool = None
-    x: torch.Tensor = None
-    x_pos: torch.Tensor = None
-    x_neg: torch.Tensor = None
+    channels: int
     shuffle: bool = False
     tt_split: float = 0.8
 
