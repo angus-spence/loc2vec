@@ -10,6 +10,7 @@ loader = Data_Loader(
     x_path=r'C:\Users\aspence1\Documents\RSIB\Loc2Vec\highway',
     x_pos_path=r'C:\Users\aspence1\Documents\RSIB\Loc2Vec\highway',
     x_neg_path=r'C:\Users\aspence1\Documents\RSIB\Loc2Vec\highway',
+    channels=1,
     batch_size=60,
     shuffle=False
 )

@@ -19,7 +19,7 @@ class Data_Loader():
     Object for loading train and test data for the loc2vec network
 
     Args:
-        x_path: path of directory with x anchor rasters
+        x_path: str path or array-like directory with x anchor rasters
         x_pos_path: path of directory with x positive anchor rasters
         y_neg_path: path of directory with x negative anchor rasters
         batch_size: batch size to use in dataloaded
@@ -41,10 +41,10 @@ class Data_Loader():
             self.cuda = True
         else: self.device = torch.device('cpu')
 
+    def load_from_dir(self) -> [torch.Tensor, torch.Tensor, torch.Tensor]:
         t = time.gmtime(time.time())
         print(f'Data Loader {t[3]}:{t[4]}:{t[5]} Device: {str(self.device).upper()}\n{os.get_terminal_size()[0] * "-"}')
 
-    def load(self) -> [torch.Tensor, torch.Tensor, torch.Tensor]:
         if self._check_path():
             print(f'Loading images from:\n   -> {self.x_path}\n   -> {self.x_pos_path}\n   -> {self.x_neg_path}')
             self.x, self.x_pos, self.x_neg = (torch.stack([torchvision.io.read_image(os.path.join(j, os.listdir(j)[i]))[:3, :, :] for i in range(len(os.listdir(j)))]).type(torch.float).to(device) for j in [self.x_path, self.x_pos_path, self.x_neg_path])
