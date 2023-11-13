@@ -7,9 +7,9 @@ import torch
 from torch import nn
 
 loader = Data_Loader(
-    x_path=r'C:\Users\Malcolm\Documents\Scripts\loc2vec\src\loc2vec\test_data',
-    x_pos_path=r'C:\Users\Malcolm\Documents\Scripts\loc2vec\src\loc2vec\test_data',
-    x_neg_path=r'C:\Users\Malcolm\Documents\Scripts\loc2vec\src\loc2vec\test_data',
+    x_path=r'/home/azureuser/devops/loc2vec_data',
+    x_pos_path=r'/home/azureuser/devops/loc2vec_data',
+    x_neg_path=r'/home/azureuser/devops/loc2vec_data',
     batch_size=120,
     shuffle=False
 )
