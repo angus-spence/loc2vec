@@ -10,7 +10,7 @@ loader = Data_Loader(
     x_path=r'/home/azureuser/devops/loc2vec_data',
     x_pos_path=r'/home/azureuser/devops/loc2vec_data',
     x_neg_path=r'/home/azureuser/devops/loc2vec_data',
-    batch_size=120,
+    batch_size=60,
     shuffle=False
 )
 
