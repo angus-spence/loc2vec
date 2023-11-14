@@ -1,6 +1,7 @@
 import os
 import time
 import enum
+from itertools import groupby
 from dataclasses import dataclass
 
 from torch import nn
@@ -32,7 +33,6 @@ class Data_Loader():
     x_pos_path: str
     x_neg_path: str
     batch_size: int
-    channels: int
     shuffle: bool = False
     tt_split: float = 0.8
 
@@ -42,59 +42,103 @@ class Data_Loader():
             self.cuda = True
         else: self.device = torch.device('cpu')
         self.data_dirs = [self.x_path, self.x_pos_path, self.x_neg_path]
+        self.channels = self._get_channels()
 
     def load_from_dirs(self) -> [torch.Tensor, torch.Tensor, torch.Tensor]:
+        """
+        Loads PNG to tensors
+        """
+        #TODO: UPDATE THIS SO THAT IT EXCEPTS A ARRAY-LIKE OBJECT FOR PATH
         t = time.gmtime(time.time())
         print(f'Data Loader {t[3]}:{t[4]}:{t[5]} Device: {str(self.device).upper()}\n{os.get_terminal_size()[0] * "-"}')
 
-        if self._check_path():
-            print(f'Loading images from:\n   -> {self.x_path}\n   -> {self.x_pos_path}\n   -> {self.x_neg_path}')
-            self.x, self.x_pos, self.x_neg = (torch.stack([torchvision.io.read_image(os.path.join(j, os.listdir(j)[i]))[:3, :, :] for i in range(len(os.listdir(j)))]).type(torch.float).to(device) for j in [self.x_path, self.x_pos_path, self.x_neg_path])
-        if self.cuda: print(f'   -> Memory: {round(self._get_memory() / 1e9, 3)} GB')
+        steps = self._get_samples() * self._get_channels()
+
+
+
+
+
+        #if self._check_path():
+        #    print(f'Loading images from:\n   -> {self.x_path}\n   -> {self.x_pos_path}\n   -> {self.x_neg_path}')
+        #    self.x, self.x_pos, self.x_neg = (torch.stack([torchvision.io.read_image(os.path.join(j, os.listdir(j)[i]))[:3, :, :] for i in range(len(os.listdir(j)))]).type(torch.float).to(device) for j in [self.x_path, self.x_pos_path, self.x_neg_path])
+        #if self.cuda: print(f'   -> Memory: {round(self._get_memory() / 1e9, 3)} GB')
+        
+        return
 
     def _get_samples(self) -> int:
-        if self._check_path(): self.samples = len(os.listdir(self.x_path))
+        """
+        Return number of samples
+        """    
+        if self._check_samples()[0]: return self._check_samples()[1]
 
-    def _check_paths(self) -> bool:
-        if (isinstance(i, (str, tuple, list)) for i in self.data_dirs) == (True, True, True): 
-            types = True
-        else: raise TypeError(f'Paths must be str or array-like type: got {(type(i) for i in self.data_dirs)}')
-        if type(self.x_path) is str and type(self.x_pos_path) is str and type(self.x_neg_path) is str: return True
-        elif isinstance(self.x_path, (tuple, list)) == True and isinstance(self.x_pos_path, (tuple, list)) and isinstance(self.x_neg_path, (tuple, list)): return True
-        else: 
+    def _check_samples(self):
+        """
+        Evaluates if sample indicies are equal across paths
+        """
+        t = []
+        for dir in [f for dir in self._get_locs() for f in dir]:
+            t.append((len(os.listdir(dir))))
+        t = groupby(t)
+        return next(t, True) and not next(t, False), t[0]
+
+    def _get_locs(self) -> list:
+        """
+        Return paths of directories for images
+        """
+        dirs_arr = []
+        for path_i in self.data_dirs:
+            if self._check_path_types()[self.data_dirs.index(path_i)] == str:
+                for root, dirs, files in os.walk(path_i):
+                    if dirs: dirs_arr.append([str(os.path.join(path_i, dir)) for dir in dirs])
+            else: dirs_arr.append([str(os.path.join(path_i, i)) for i in self.data_dirs[self.data_dirs.index(path_i)]])
+        return dirs_arr
+
+    def _check_path_types(self) -> list:
+        """
+        Return the path types of each input
+        """
+        types = []
+        for path in self.data_dirs:
+            types.append(type(path))
+        return types
+
+    def _data_struct(self) -> dict:
+        """
+        Returns the scructure of data withn paths as array
+        """
+        struct = {}
+        for path in self.data_dirs:
+            files_ar = []
+            for root, dirs, files in os.walk(path):
+                files_ar.append(len(files))
+                struct.update({str(path): files_ar})            
+        return struct
+
+    def _check_file_types(self):
+        """
+        Evaluate if all samples are PNG
+        """
+        #TODO: IMPLEMENT THIS
 
     def _check_channels(self) -> bool:
-        if self._check_path_type() == (True, True, True):
-        
-
-    def _check_path_type(self) -> (bool):
         """
-        Checks that all paths are valid.
+        Evaluate if all inputs have equal channels
         """
-        return (isinstance(i, str) for i in zip(self.data_dirs))
+        #TODO: IMPLEMENT THIS
+        if self._check_paths():
+            c = [len(os.listdir(i)) for i in [i for s in self._get_locs() for i in s]]
+        c_g = groupby(c)
+        return next(c_g, True) and not next(c_g, False), c
 
-    def _check_path():
-        self.paths = {}
-        for path in [self.x_path, self.x_pos_path, self.x_neg_path]:
-            if isinstance(path, list) or isinstance(path, tuple):
-                d1 = {str(path): [os.listdir(i) for i in path]}
-                self.paths.update(d1)
-            elif isinstance(path, str):
-                d1 = {str(path): path}
-            else:
-                raise TypeError(f'Paths must be str or array-like')
-                    
-        for path in self.paths.values():
-            if not os.path.isdir(path):
-                raise ValueError(f'Path {path} is not a valid directory.')
-            
-        
+    def _get_channels(self) -> int:
+        return self._check_channels()[1]
 
-
-
-        if len(os.listdir(self.x_path)) != len(os.listdir(self.x_pos_path)) or len(os.listdir(self.x_path)) != len(os.listdir(self.x_neg_path)):
-            raise ValueError(f'All paths must have the same number of files. Got {len(os.listdir(self.x_path))}, {len(os.listdir(self.x_pos_path))}, {len(os.listdir(self.x_neg_path))}.')
-        return True
+    def _check_paths(self):
+        """
+        Evaluates if all paths exist
+        """
+        if [os.path.isdir(i) for i in self.data_dirs] == [True, True, True]: return True
+        else: raise ValueError(f'Input paths do not exist')
 
     def _check_shape(self) -> None:
         """
@@ -105,9 +149,17 @@ class Data_Loader():
             if c != h or c != w or h != w:
                 raise ValueError(f'All tensors must have the same shape. Got {c}, {h}, {w}.') 
 
-    def _check_dtype(self) -> bool:
+    def _check_dtype(self, x_i: torch.tensor, x_pos: torch.tensor, x_neg: torch.tensor) -> bool:
         """
         Checks that all tensors have the same dtype.
+
+        Parameters
+        ----------
+        x_i: torch.tensor
+            tensor for anchor
+        x_pos: torch.tensor
+            tensor for positive anchor
+        x_neg: torch.tensor
         """
         dt_c = True
         for x, y, z in zip(self.x, self.x_pos, self.x_neg):
