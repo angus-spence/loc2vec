@@ -15,8 +15,6 @@ loader = Data_Loader(
     shuffle=False
 )
 
-loader.load()
-
 quit()
 
 class Network(torch.nn.Module):
