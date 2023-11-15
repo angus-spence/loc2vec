@@ -52,6 +52,11 @@ class Data_Loader():
     def load_from_dirs(self) -> [torch.Tensor, torch.Tensor, torch.Tensor]:
         """
         Loads PNG to tensors
+
+        Returns
+        -------
+        torch.Tensor
+            Tensors for anchors
         """
         #TODO: UPDATE THIS SO THAT IT EXCEPTS AN ARRAY-LIKE OBJECT FOR PATH
             # 
@@ -68,7 +73,6 @@ class Data_Loader():
 
         def c(i, steps):
             return
-
 
         for path_i in self.data_dirs:
             print(f'   -> Loading from {path_i}')
@@ -102,6 +106,8 @@ class Data_Loader():
         """
         Return paths of directories for images
         """
+        #TODO: THIS DOES NOT WORK IF THERE IS ONLY ONE CHANNEL
+        #       NEED TO CHECK IF CHANGES MADE 15/11/23 : 22:13 WORK FOR MULTIPLE DIRS
         dirs_arr = []
         for path_i in self.data_dirs:
             if self._check_path_types()[self.data_dirs.index(path_i)] == str:
@@ -140,8 +146,13 @@ class Data_Loader():
         """
         Evaluate if all inputs have equal channels
         """
+        #TODO: THIS DOES NOT WORK IF THERE IS ONLY ONE CHANNEL
+        #       PROBABLY BREAKS MOST THINGS IF THERE IS ONLY ONE CHANNEL    
         if self._check_paths():
-            c = [len(os.listdir(i)) for i in [i for s in self._get_locs() for i in s]]
+            c = []
+            for path_i in self.data_dirs:
+                for root, dirs, files in os.walk(path_i):
+                    c.append(len(dirs))
         c_g = groupby(c)
         return next(c_g, True) and not next(c_g, False), c[0]
 
@@ -155,45 +166,79 @@ class Data_Loader():
         if [[os.path.isdir(i) for i in self.data_dirs]] == [[True]*len(self.data_dirs)]: return True
         else: raise ValueError(f'Input paths do not exist: got {[(os.path.isdir(i), i) for i in self.data_dirs]}')
 
-    def _check_shape(self) -> None:
+    def _check_shape(self, x_i: torch.Tensor, x_pos: torch.Tensor, x_neg: torch.Tensor) -> bool:
         """
         Checks that all tensors have the same shape.
+
+        Parameters
+        ----------
+        x_i: torch.tensor
+            Tensor for anchor
+        x_pos: torch.tensor
+            Tensor for (+) anchor
+        x_neg: torch.tensor
+            Tensor for (-) anchor
+        
+        Returns
+        -------
+        bool
+            True if all tensors have the same shape
         """
-        for x, y, z in zip(self.x, self.x_pos, self.x_neg):
+        for x, y, z in zip(x_i, x_pos, x_neg):
             c, h, w = x.shape, y.shape, z.shape
             if c != h or c != w or h != w:
                 raise ValueError(f'All tensors must have the same shape. Got {c}, {h}, {w}.') 
 
-    def _check_dtype(self, x_i: torch.tensor, x_pos: torch.tensor, x_neg: torch.tensor) -> bool:
+    def _check_dtype(self, x_i: torch.Tensor, x_pos: torch.Tensor, x_neg: torch.Tensor) -> bool:
         """
         Checks that all tensors have the same dtype.
 
         Parameters
         ----------
         x_i: torch.tensor
-            tensor for anchor
+            Tensor for anchor
         x_pos: torch.tensor
-            tensor for positive anchor
+            Tensor for (+) anchor
         x_neg: torch.tensor
+            Tensor for (-) anchor
+
+        Returns
+        -------
+        bool
+            True if all tensors have the same dtype
         """
         dt_c = True
-        for x, y, z in zip(self.x, self.x_pos, self.x_neg):
-            c, h, w = x.dtype, y.dtype, z.dtype
-            if c != h or c != w or h != w:
+        for x, y, z in zip(x_i, x_pos, x_neg):
+            x1, x2, x3 = x.dtype, y.dtype, z.dtype
+            if x1 != x2 or x3 != x1 or x2 != x3:
                 dt_c = False
         if not dt_c:
             try:
-                for x, y, z in zip(self.x, self.x_pos, self.x_neg):
-                    x, y, z = x.type(torch.float), y.type(self.dtype), z.type(self.dtype)
+                for x, y, z in zip(x_i, x_pos, x_neg):
+                    x, y, z = x.type(torch.float), y.type(torch.float), z.type(torch.float)
             except:
-                raise ValueError(f'All tensors must have the same dtype. Got {c}, {h}, {w}.')
+                raise ValueError(f'All tensors must have the same dtype. Got {x1}, {x2}, {x3}.')
             
-    def _check_device(self) -> bool:
+    def _check_device(self, x_i: torch.Tensor, x_pos: torch.Tensor, x_neg: torch.Tensor) -> bool:
         """
         Checks that all tensors are on the same device.
+
+        Parameters
+        ----------
+        x_i: torch.tensor
+            Tensor for anchor
+        x_pos: torch.tensor
+            Tensor for (+) anchor
+        x_neg: torch.tensor
+            Tensor for (-) anchor
+        
+        Returns
+        -------
+        bool
+            True if all tensors are on the same device
         """
         b = False
-        for x, y, z in zip(self.x, self.x_pos, self.x_neg):
+        for x, y, z in zip(x_i, x_pos, x_neg):
             c, h, w = x.device, y.device, z.device
             if c != h or c != w or h != w:
                 return False
