@@ -7,9 +7,9 @@ import torch
 from torch import nn
 
 loader = Data_Loader(
-    x_path=r'C:\Users\aspence1\Documents\RSIB\Loc2Vec',
-    x_pos_path=r'C:\Users\aspence1\Documents\RSIB\Loc2Vec',
-    x_neg_path=r'C:\Users\aspence1\Documents\RSIB\Loc2Vec',
+    x_path=r'\\SWPUKNAS2201\dst\Data\Projects\RSIB\data\raw\loc2vec',
+    x_pos_path=r'\\SWPUKNAS2201\dst\Data\Projects\RSIB\data\raw\loc2vec',
+    x_neg_path=r'\\SWPUKNAS2201\dst\Data\Projects\RSIB\data\raw\loc2vec',
     batch_size=60,
     shuffle=False
 )

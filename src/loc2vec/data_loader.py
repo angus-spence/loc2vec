@@ -18,7 +18,7 @@ path = r'C:\Users\Malcolm\Documents\Scripts\loc2vec\src\loc2vec\test_data'
 @dataclass
 class Data_Loader():
     """
-    Object for loading train and test data for the loc2vec network
+    Object for loading train and test data to tensor
 
     Args:
         x_path: str path or array-like directory with x anchor rasters
@@ -31,8 +31,8 @@ class Data_Loader():
     """
     x_path: str
     x_pos_path: str
-    x_neg_path: str
     batch_size: int
+    x_neg_path: str = False
     shuffle: bool = False
     tt_split: float = 0.8
 
@@ -41,7 +41,8 @@ class Data_Loader():
             self.device = torch.device('cuda')
             self.cuda = True
         else: self.device = torch.device('cpu')
-        self.data_dirs = [self.x_path, self.x_pos_path, self.x_neg_path]
+        if self.x_neg_path: self.data_dirs = [self.x_path, self.x_pos_path, self.x_neg_path]
+        else: self.data_dirs = [self.x_path, self.x_pos_path] 
         self.channels = self._get_channels()
 
     def load_from_dirs(self) -> [torch.Tensor, torch.Tensor, torch.Tensor]:
@@ -55,12 +56,9 @@ class Data_Loader():
 
         steps = self._get_samples() * self._get_channels()
         
+
         print(self._data_struct())
             
-
-
-
-
         #if self._check_path():
         #    print(f'Loading images from:\n   -> {self.x_path}\n   -> {self.x_pos_path}\n   -> {self.x_neg_path}')
         #    self.x, self.x_pos, self.x_neg = (torch.stack([torchvision.io.read_image(os.path.join(j, os.listdir(j)[i]))[:3, :, :] for i in range(len(os.listdir(j)))]).type(torch.float).to(device) for j in [self.x_path, self.x_pos_path, self.x_neg_path])
@@ -73,6 +71,7 @@ class Data_Loader():
         Return number of samples
         """    
         if self._check_samples()[0]: return self._check_samples()[1]
+        else: raise TypeError(f'Must have equal samples in channel. Check samples in data directories')
 
     def _check_samples(self):
         """
@@ -122,7 +121,6 @@ class Data_Loader():
         Evaluate if all samples are PNG
         """
         
-
     def _check_channels(self) -> bool:
         """
         Evaluate if all inputs have equal channels
@@ -130,7 +128,7 @@ class Data_Loader():
         if self._check_paths():
             c = [len(os.listdir(i)) for i in [i for s in self._get_locs() for i in s]]
         c_g = groupby(c)
-        return next(c_g, True) and not next(c_g, False), c
+        return next(c_g, True) and not next(c_g, False), c[0]
 
     def _get_channels(self) -> int:
         return self._check_channels()[1]
