@@ -9,8 +9,8 @@ from torch import nn
 from tqdm import tqdm
 
 loader = Data_Loader(
-    x_path=r'\\SWPUKNAS2201\dst\Data\Projects\RSIB\data\raw\loc2vec\multipolygons',
-    x_pos_path=r'\\SWPUKNAS2201\dst\Data\Projects\RSIB\data\raw\loc2vec\multipolygons',
+    x_path=Params.X_PATH.value,
+    x_pos_path=Params.X_POS_PATH.value,
     batch_size=60,
     shuffle=False
 )
