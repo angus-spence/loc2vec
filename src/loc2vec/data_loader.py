@@ -20,23 +20,26 @@ path = r'C:\Users\Malcolm\Documents\Scripts\loc2vec\src\loc2vec\test_data'
 @dataclass
 class Data_Loader():
     """
-    Object for loading train and test data to tensor
+    Object for loading data to tensor
 
-    Args:
-        x_path: str path or array-like directory with x anchor rasters
-        x_pos_path: path of directory with x positive anchor rasters
-        y_neg_path: path of directory with x negative anchor rasters
-        batch_size: batch size to use in dataloaded
-        channels: number of channels for each anchor index
-        shuffle: shuffle indecies in dataloader
-        tt_split: percentage of training samples 
+    Parameters
+    ----------
+    x_path: [str, tuple, list]
+        String or array-like object of strings of directory paths to x data
+    x_pos_path: [str, tuple, list]
+        String or array-like object of strings of directory paths to positive anchor data
+    batch_size: int
+        Batch size for tensors
+    x_neg_path: [str, tuple, list]
+        String or array-like object of strings of directory paths to negative anchor data
+    shuffle: bool
+        Boolean for if data indicies should be shuffeled
     """
     x_path: str
     x_pos_path: str
     batch_size: int
     x_neg_path: str = False
     shuffle: bool = False
-    tt_split: float = 0.8
 
     def __post_init__(self):
         if torch.cuda.is_available():
@@ -44,8 +47,7 @@ class Data_Loader():
             self.cuda = True
         else: self.device = torch.device('cpu')
         if self.x_neg_path: self.data_dirs = [self.x_path, self.x_pos_path, self.x_neg_path]
-        else: self.data_dirs = [self.x_path, self.x_pos_path] 
-        self.channels = self._get_channels()
+        else: self.data_dirs = [self.x_path, self.x_pos_path]
 
     def load_from_dirs(self) -> [torch.Tensor, torch.Tensor, torch.Tensor]:
         """
@@ -201,11 +203,6 @@ class Data_Loader():
                     x, y, z = x.to(self.device), y.to(self.device), z.to(self.device)
             except:
                 raise ValueError(f'All tensors must be on the same device. Got {c}, {h}, {w}.')
-            
-    def _train_test_split(self):
-        """
-        """
-        return
 
     def _get_memory(self):
         return torch.cuda.memory_allocated(self.device)
