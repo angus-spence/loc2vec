@@ -49,11 +49,14 @@ class Data_Loader():
         Loads PNG to tensors
         """
         #TODO: UPDATE THIS SO THAT IT EXCEPTS A ARRAY-LIKE OBJECT FOR PATH
+            # 
         t = time.gmtime(time.time())
         print(f'Data Loader {t[3]}:{t[4]}:{t[5]} Device: {str(self.device).upper()}\n{os.get_terminal_size()[0] * "-"}')
 
         steps = self._get_samples() * self._get_channels()
-
+        
+        print(self._data_struct())
+            
 
 
 
@@ -78,8 +81,8 @@ class Data_Loader():
         t = []
         for dir in [f for dir in self._get_locs() for f in dir]:
             t.append((len(os.listdir(dir))))
-        t = groupby(t)
-        return next(t, True) and not next(t, False), t[0]
+        t_g = groupby(t)
+        return next(t_g, True) and not next(t_g, False), t[0]
 
     def _get_locs(self) -> list:
         """
@@ -118,13 +121,12 @@ class Data_Loader():
         """
         Evaluate if all samples are PNG
         """
-        #TODO: IMPLEMENT THIS
+        
 
     def _check_channels(self) -> bool:
         """
         Evaluate if all inputs have equal channels
         """
-        #TODO: IMPLEMENT THIS
         if self._check_paths():
             c = [len(os.listdir(i)) for i in [i for s in self._get_locs() for i in s]]
         c_g = groupby(c)
@@ -177,11 +179,11 @@ class Data_Loader():
         """
         Checks that all tensors are on the same device.
         """
-        b = True
+        b = False
         for x, y, z in zip(self.x, self.x_pos, self.x_neg):
             c, h, w = x.device, y.device, z.device
             if c != h or c != w or h != w:
-                b = False
+                return False
         if not b:
             try:
                 for x, y, z in zip(self.x, self.x_pos, self.x_neg):

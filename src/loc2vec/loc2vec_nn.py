@@ -14,6 +14,8 @@ loader = Data_Loader(
     shuffle=False
 )
 
+loader.load_from_dirs()
+
 quit()
 
 class Network(torch.nn.Module):
