@@ -31,7 +31,7 @@ class Data_Loader():
     batch_size: int
         Batch size for tensors
     x_neg_path: [str, tuple, list]
-        String or array-like object of strings of directory paths to negative anchor data
+        String or array-like object of strings for directory paths to negative anchor data
     shuffle: bool
         Boolean for if data indicies should be shuffeled
     """

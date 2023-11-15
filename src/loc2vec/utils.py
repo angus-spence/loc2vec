@@ -1,5 +1,7 @@
 import torch, torchvision
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as ani
 
 def visualise_tensor(tensor: torch.Tensor, ch:int=0, allkernels:bool=False, nrow:int=0, padding:int=1) -> np.ndarray:
     """
@@ -15,7 +17,7 @@ def visualise_tensor(tensor: torch.Tensor, ch:int=0, allkernels:bool=False, nrow
         View all kernels
     nrow: int
         Number of rows in visualisation
-    padding: int
+    padding: ints
         Padding between kernels in visualisation
     """
     n,c,w,h = tensor.shape
@@ -27,6 +29,18 @@ def visualise_tensor(tensor: torch.Tensor, ch:int=0, allkernels:bool=False, nrow
     grid = torchvision.utils.make_grid(tensor, nrow=nrow, normalize=True, padding=padding)
     return grid.numpy().transpose((1,2,0))
 
+def embedding_sequencing(embeddings: torch.Tensor) -> np.ndarray:
+    """
+    Returns embedding stamps at each epoch to visualise embedding space over time
+    
+    Parameters
+    ----------
+    embeddings: torch.Tensor
+        torch tensor of vector embeddings at given epoch
+    """
+    #TODO: IMPLEMENT THIS
+    embs = embeddings.numpy()
+    
 def gpu_compute_memory(model: torch.nn.Module) -> float:
     """
     Returns the memory required by a model
