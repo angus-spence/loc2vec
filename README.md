@@ -3,7 +3,7 @@
 Pytoch implementation of the *Loc2Vec* model outlined in the blog post '*Loc2Vec: Learning Location Embeddings with Triplet-loss Networks*'.
 
 ### Use
-Implementation requires user to hold both anchor an
+Implementation requires user to hold both anchor and positive anchor rasters. Negative anchors can be specified, with random indicies selected for such purpose if not.
 
 
 ### Model Results

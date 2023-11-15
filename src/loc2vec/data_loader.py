@@ -4,8 +4,10 @@ import enum
 from itertools import groupby
 from dataclasses import dataclass
 
+from tqdm import tqdm
 from torch import nn
-import torch, torchvision
+import torch
+import torchvision as tv
 import matplotlib.pyplot as plt
 
 
@@ -49,15 +51,26 @@ class Data_Loader():
         """
         Loads PNG to tensors
         """
-        #TODO: UPDATE THIS SO THAT IT EXCEPTS A ARRAY-LIKE OBJECT FOR PATH
+        #TODO: UPDATE THIS SO THAT IT EXCEPTS AN ARRAY-LIKE OBJECT FOR PATH
             # 
         t = time.gmtime(time.time())
         print(f'Data Loader {t[3]}:{t[4]}:{t[5]} Device: {str(self.device).upper()}\n{os.get_terminal_size()[0] * "-"}')
+        print(f'Loading to torch:')
 
-        steps = self._get_samples() * self._get_channels()
-        
+        steps = (self._get_channels() * self._get_samples()) / len(self.data_dirs)
+        files = os.walk(self.data_dirs[0])[2]
+        print(files)
+        quit()
+        features = []
 
-        print(self._data_struct())
+
+        def c(i, steps):
+            return
+
+
+        for path_i in self.data_dirs:
+            print(f'   -> Loading from {path_i}')
+            features.append([torch.stack([tv.io.read_image(file) and c(file) for root, dir, file in os.walk(path_i)])])
             
         #if self._check_path():
         #    print(f'Loading images from:\n   -> {self.x_path}\n   -> {self.x_pos_path}\n   -> {self.x_neg_path}')
@@ -70,8 +83,8 @@ class Data_Loader():
         """
         Return number of samples
         """    
-        if self._check_samples()[0]: return self._check_samples()[1]
-        else: raise TypeError(f'Must have equal samples in channel. Check samples in data directories')
+        if self._check_samples()[0]: return self._check_samples()[1][0]
+        else: raise TypeError(f'Must have equal samples in channel. Check samples in data directories. Got {self._check_samples()[1]}')
 
     def _check_samples(self):
         """
@@ -81,7 +94,7 @@ class Data_Loader():
         for dir in [f for dir in self._get_locs() for f in dir]:
             t.append((len(os.listdir(dir))))
         t_g = groupby(t)
-        return next(t_g, True) and not next(t_g, False), t[0]
+        return next(t_g, True) and not next(t_g, False), t
 
     def _get_locs(self) -> list:
         """
@@ -137,8 +150,8 @@ class Data_Loader():
         """
         Evaluates if all paths exist
         """
-        if [os.path.isdir(i) for i in self.data_dirs] == [True, True, True]: return True
-        else: raise ValueError(f'Input paths do not exist')
+        if [[os.path.isdir(i) for i in self.data_dirs]] == [[True]*len(self.data_dirs)]: return True
+        else: raise ValueError(f'Input paths do not exist: got {[(os.path.isdir(i), i) for i in self.data_dirs]}')
 
     def _check_shape(self) -> None:
         """
