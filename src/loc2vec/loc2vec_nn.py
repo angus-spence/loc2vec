@@ -1,4 +1,5 @@
 from loc2vec.data_loader import Data_Loader
+from loc2vec.data_loader import Data_Loader
 from loc2vec.config import Params
 
 from dataclasses import dataclass
