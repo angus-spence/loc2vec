@@ -66,13 +66,20 @@ class Data_Loader():
 
         steps = (self._get_channels() * self._get_samples()) / len(self.data_dirs)
 
-        files = []
-        for path_i in self.data_dirs:
-            files.append(self._get_files(path_i))
+        comp_f = []
 
-        print(files)
+        for path_i in self.data_dirs:
+            _comp = []
+            for root, dirs, files in os.walk(path_i):
+                if files: _comp.append(files)
+            print(f'[{len(_comp)}, {len(_comp[0])}]')
+            for j in range(len(_comp[0])):
+                comp_f.append([os.path.join(path_i,os.listdir(path_i)[i],_comp[i][j]) for i in range(len(_comp))])
+            
+        print(len(comp_f))
         
         quit()
+
         features = []
 
 
@@ -88,26 +95,7 @@ class Data_Loader():
         #    self.x, self.x_pos, self.x_neg = (torch.stack([torchvision.io.read_image(os.path.join(j, os.listdir(j)[i]))[:3, :, :] for i in range(len(os.listdir(j)))]).type(torch.float).to(device) for j in [self.x_path, self.x_pos_path, self.x_neg_path])
         #if self.cuda: print(f'   -> Memory: {round(self._get_memory() / 1e9, 3)} GB')
         
-        return
-
-    def _get_files(self, directory: str) -> list:
-        """
-        Return list of files in dir
-
-        Parameters
-        ----------
-        data_dir: str
-            Path of directory for evaluation
-        
-        Returns
-        -------
-        files: list
-            List of files
-        """
-        files = {}
-        for root, dir, file in os.walk(directory):
-            if file: files.update({dir: [file]})
-        return files
+        return 
 
     def _get_samples(self) -> int:
         """
