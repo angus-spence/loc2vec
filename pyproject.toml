@@ -1,5 +1,5 @@
 [project]
-name = "loc2Vec"
+name = "loc2vec"
 version = "0.0.1"
 description = "PyTorch implementation of Loc2Vec as specified in the blog post https://sentiance.com/loc2vec-learning-location-embeddings-w-triplet-loss-networks"
 readme = "README.md"
