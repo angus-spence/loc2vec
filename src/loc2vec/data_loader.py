@@ -65,8 +65,13 @@ class Data_Loader():
         print(f'Loading to torch:')
 
         steps = (self._get_channels() * self._get_samples()) / len(self.data_dirs)
-        files = os.walk(self.data_dirs[0])[2]
+
+        files = []
+        for path_i in self.data_dirs:
+            files.append(self._get_files(path_i))
+
         print(files)
+        
         quit()
         features = []
 
@@ -84,6 +89,25 @@ class Data_Loader():
         #if self.cuda: print(f'   -> Memory: {round(self._get_memory() / 1e9, 3)} GB')
         
         return
+
+    def _get_files(self, directory: str) -> list:
+        """
+        Return list of files in dir
+
+        Parameters
+        ----------
+        data_dir: str
+            Path of directory for evaluation
+        
+        Returns
+        -------
+        files: list
+            List of files
+        """
+        files = {}
+        for root, dir, file in os.walk(directory):
+            if file: files.update({dir: [file]})
+        return files
 
     def _get_samples(self) -> int:
         """

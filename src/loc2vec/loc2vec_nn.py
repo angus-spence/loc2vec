@@ -63,7 +63,10 @@ class TripletLossFunction(nn.Module):
         x2: torch.Tensor
             Tensor 2
         
-        
+        Return
+        ------
+        torch.Tensor
+            A tensor representing the euclidean distance between two vectors
         """
         return (x1 - x2).pow(2).sum(1)
     
@@ -79,6 +82,11 @@ class TripletLossFunction(nn.Module):
             Tensor for (+) anchor for x[i]
         anchor_neg: torch.Tensor
             Tensor for (-) anchor for x[i]
+        
+        Returns
+        -------
+        loss: torch.Tensor
+            Tensor output from the Triplet Loss Funciton
         """
         distance_to_pos = self.calc_euclidean(anchor, anchor_pos)
         distance_to_neg = self.calc_euclidean(anchor, anchor_neg)
