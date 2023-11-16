@@ -19,6 +19,7 @@ path = r'C:\Users\Malcolm\Documents\Scripts\loc2vec\src\loc2vec\test_data'
 
 @dataclass
 class Data_Loader():
+    #TODO: REALLY SHOULD MAKE THIS WORK FOR BOTH DIRS AND DIRECT FROM TENSOR FILES --> PROBABLY DONT HAVE TIME FOR THIS
     """
     Object for loading data to tensor
 
@@ -28,6 +29,8 @@ class Data_Loader():
         String or array-like object of strings of directory paths to x data
     x_pos_path: [str, tuple, list]
         String or array-like object of strings of directory paths to positive anchor data
+    train_tensory_directory: str
+        Path to directory where train tensors should be saved
     batch_size: int
         Batch size for tensors
     x_neg_path: [str, tuple, list]
@@ -38,6 +41,7 @@ class Data_Loader():
     x_path: str
     x_pos_path: str
     batch_size: int
+    train_tensor_directory: str
     x_neg_path: str = False
     shuffle: bool = False
 
@@ -66,9 +70,8 @@ class Data_Loader():
 
         steps = (self._get_channels() * self._get_samples()) / len(self.data_dirs)
 
-        comp_f = []
-
         for path_i in self.data_dirs:
+            comp_f = []
             _comp = []
             for root, dirs, files in os.walk(path_i):
                 if files: _comp.append(files)
@@ -76,7 +79,13 @@ class Data_Loader():
             for j in range(len(_comp[0])):
                 comp_f.append([os.path.join(path_i,os.listdir(path_i)[i],_comp[i][j]) for i in range(len(_comp))])
             
-        print(len(comp_f))
+        #TODO: LOAD COMP_F INTO TENSORS THIS CANNOT BE THE FASTEST WAY TO DO IT
+        
+        quit()
+
+        x_i: torch.Tensor = None
+        x_pos: torch.Tensor = None
+        x_neg: torch.Tensor = None
         
         quit()
 
