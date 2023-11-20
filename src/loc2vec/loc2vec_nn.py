@@ -17,6 +17,8 @@ loader = Data_Loader(
 
 data = loader.load_from_dirs()
 
+quit()
+
 class Network(torch.nn.Module):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)

@@ -73,7 +73,6 @@ class Data_Loader():
         t_data = self.tensor_stack(files=self._get_data_files())
         print(t_data)
         print(t_data.shape)
-        quit()
 
     def _get_data_files(self) -> list:
         """
@@ -106,10 +105,10 @@ class Data_Loader():
         """
         data_tensors = []
         for file in files:
-            for index in range(len(files[0])):
+            for index in range(len(file)):
                 data_tensors.append(tv.io.read_image(file[index])[:3,:,:].type(torch.float))
         print(data_tensors)
-        return torch.stack(data_tensors).to(device)
+        return [torch.stack(data_tensors[i]).to(device) for i in range(len(data_tensors))]
 
     def _get_samples(self) -> int:
         """
