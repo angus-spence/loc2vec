@@ -106,11 +106,12 @@ class Data_Loader():
             data_tensors = []
             for file in files:
                 for index in range(len(file)): 
-                    data_tensors.append(tv.io.read_image(file[index])[:3,:,:].type(torch.float))
+                    data_tensors.append(tv.io.read_image(file[index])[:3,:,:].type(torch.float).to(device))
+                    print()
         except Exception as e: print(e) 
         print("WTF DOES DATA TENSORTS LOOK LIKE")
         print(data_tensors)
-        return [torch.stack(data_tensors[i]).to(device) for i in range(len(data_tensors))]
+        return [torch.stack(data_tensors[i]) for i in range(len(data_tensors))]
 
     def _get_samples(self) -> int:
         """
