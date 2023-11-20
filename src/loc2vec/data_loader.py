@@ -63,13 +63,27 @@ class Data_Loader():
             Tensors for anchors
         """
         #TODO: UPDATE THIS SO THAT IT EXCEPTS AN ARRAY-LIKE OBJECT FOR PATH
-            # 
+            # THIS WILL JUST CALL _GET_DATA_FILES AND TENSOR STACK METHODS
+        
         t = time.gmtime(time.time())
         print(f'{os.get_terminal_size()[0] * "-"}\nData Loader {t[3]}:{t[4]}:{t[5]} Device: {str(self.device).upper()}\n{os.get_terminal_size()[0] * "-"}')
         print(f'Loading to torch:')
 
         steps = (self._get_channels() * self._get_samples()) / len(self.data_dirs)
+        t_data = self.tensor_stack(files=self._get_data_files())
+        print(t_data)
+        print(t_data.shape)
+        quit()
 
+    def _get_data_files(self) -> list:
+        """
+        Evaluate paths for all data inputs
+
+        Returns
+        -------
+        comp_f: list
+            List of lists containing structured paths for all data inputs
+        """
         for path_i in self.data_dirs:
             comp_f = []
             _comp = []
@@ -79,39 +93,23 @@ class Data_Loader():
             for j in range(len(_comp[0])):
                 comp_f.append([os.path.join(path_i,os.listdir(path_i)[i],_comp[i][j]) for i in range(len(_comp))])
             print(f'[{len(comp_f)}, {len(comp_f[0])}]')
-        
-        train_data = torch.stack([tv.io.read_image(file[i])[:3,:,:] for file, i in zip(range(len(comp_f)), range(len(comp_f[0])))]).type(torch.float).to(device)
-        print(train_data)
-        print(train_data.shape)
+        return comp_f
 
-        quit()
+    def tensor_stack(self, files) -> torch.Tensor:
+        #TODO: THIS NEEDS TO BE FINISHED
+        """
+        Iterates over a list of PNG paths, coverts and stacks Tensors
 
-        #TODO: LOAD COMP_F INTO TENSORS THIS CANNOT BE THE FASTEST WAY TO DO IT
-        
-        
-
-        x_i: torch.Tensor = None
-        x_pos: torch.Tensor = None
-        x_neg: torch.Tensor = None
-        
-        quit()
-
-        features = []
-
-
-        def c(i, steps):
-            return
-
-        for path_i in self.data_dirs:
-            print(f'   -> Loading from {path_i}')
-            features.append([torch.stack([tv.io.read_image(file) and c(file) for root, dir, file in os.walk(path_i)])])
-            
-        #if self._check_path():
-        #    print(f'Loading images from:\n   -> {self.x_path}\n   -> {self.x_pos_path}\n   -> {self.x_neg_path}')
-        #    self.x, self.x_pos, self.x_neg = (torch.stack([torchvision.io.read_image(os.path.join(j, os.listdir(j)[i]))[:3, :, :] for i in range(len(os.listdir(j)))]).type(torch.float).to(device) for j in [self.x_path, self.x_pos_path, self.x_neg_path])
-        #if self.cuda: print(f'   -> Memory: {round(self._get_memory() / 1e9, 3)} GB')
-        
-        return 
+        Returns
+        -------
+        output: torch.Tensor
+            Tensor of model input data; this can be for (o) anchor, (+) anchor or (-) anchor sets
+        """
+        data_tensors = []
+        for file in files:
+            for index in range(len(files[0])):
+                data_tensors.append(tv.io.read_image(file[index])[:3,:,:].type(torch.float))
+        return torch.stack(data_tensors).to(device)
 
     def _get_samples(self) -> int:
         """
