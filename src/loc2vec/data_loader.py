@@ -90,9 +90,7 @@ class Data_Loader():
                 if files: _comp.append(files)
             for j in range(len(_comp[0])):
                 comp_f.append([os.path.join(path_i,os.listdir(path_i)[i],_comp[i][j]) for i in range(len(_comp))])
-            print(f'[{len(comp_f)}, {len(comp_f[0])}]')
-            print(comp_f)
-            print(comp_f[0])
+            print(f'[{len(comp_f)}, {len(comp_f[0])}]'))
         return comp_f
 
     def tensor_stack(self, files) -> torch.Tensor:
@@ -107,6 +105,7 @@ class Data_Loader():
         data_tensors = []
         for file in files:
             for index in range(len(file)):
+                print(index, file)
                 data_tensors.append(tv.io.read_image(file[index])[:3,:,:].type(torch.float))
         print("WTF DOES DATA TENSORTS LOOK LIKE")
         print(data_tensors)
