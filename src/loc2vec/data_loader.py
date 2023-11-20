@@ -79,14 +79,12 @@ class Data_Loader():
             for j in range(len(_comp[0])):
                 comp_f.append([os.path.join(path_i,os.listdir(path_i)[i],_comp[i][j]) for i in range(len(_comp))])
             
-        train_data = [torch.stack(tv.io.read_image(file[i])[:3,:,:]) for file in comp_f]
+        train_data = torch.stack([tv.io.read_image(file[i])[:3,:,:] for file, i in zip(comp_f, range(len(_comp)))]).type(torch.float).to(device)
         print(train_data)
+        print(train_data.shape)
 
         #TODO: LOAD COMP_F INTO TENSORS THIS CANNOT BE THE FASTEST WAY TO DO IT
         
-    def 
-
-
         quit()
 
         x_i: torch.Tensor = None
