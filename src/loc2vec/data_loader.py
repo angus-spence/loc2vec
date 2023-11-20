@@ -102,11 +102,13 @@ class Data_Loader():
         output: torch.Tensor
             Tensor of model input data; this can be for (o) anchor, (+) anchor or (-) anchor sets
         """
-        data_tensors = []
-        for file in files:
-            for index in range(len(file)):
-                print(index, file)
-                data_tensors.append(tv.io.read_image(file[index])[:3,:,:].type(torch.float))
+        try:
+            data_tensors = []
+            for file in files:
+                for index in range(len(file)): 
+                    data_tensors.append(tv.io.read_image(file[index])[:3,:,:].type(torch.float))
+        except:
+            raise ValueError("Error")
         print("WTF DOES DATA TENSORTS LOOK LIKE")
         print(data_tensors)
         return [torch.stack(data_tensors[i]).to(device) for i in range(len(data_tensors))]
