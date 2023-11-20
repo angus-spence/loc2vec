@@ -108,6 +108,7 @@ class Data_Loader():
         for file in files:
             for index in range(len(file)):
                 data_tensors.append(tv.io.read_image(file[index])[:3,:,:].type(torch.float))
+        print("WTF DOES DATA TENSORTS LOOK LIKE")
         print(data_tensors)
         return [torch.stack(data_tensors[i]).to(device) for i in range(len(data_tensors))]
 
