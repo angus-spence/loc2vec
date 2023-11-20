@@ -41,8 +41,8 @@ class Data_Loader():
     x_path: str
     x_pos_path: str
     batch_size: int
-    train_tensor_directory: str
-    x_neg_path: str = False
+    train_tensor_directory: str = None
+    x_neg_path: str = None
     shuffle: bool = False
 
     def __post_init__(self):

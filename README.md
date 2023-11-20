@@ -5,7 +5,6 @@ Pytoch implementation of the *Loc2Vec* model outlined in the blog post '*Loc2Vec
 ### Use
 Implementation requires user to hold both anchor and positive anchor rasters. Negative anchors can be specified, with random indicies selected for such purpose if not.
 
-
 ### Model Results
 This implementation was tested with the following OSM raster aggregated channels:
 - OSM Lines:
