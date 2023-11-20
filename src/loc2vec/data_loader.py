@@ -65,7 +65,7 @@ class Data_Loader():
         #TODO: UPDATE THIS SO THAT IT EXCEPTS AN ARRAY-LIKE OBJECT FOR PATH
             # 
         t = time.gmtime(time.time())
-        print(f'Data Loader {t[3]}:{t[4]}:{t[5]} Device: {str(self.device).upper()}\n{os.get_terminal_size()[0] * "-"}')
+        print(f'{os.get_terminal_size()[0] * "-"}\nData Loader {t[3]}:{t[4]}:{t[5]} Device: {str(self.device).upper()}\n{os.get_terminal_size()[0] * "-"}')
         print(f'Loading to torch:')
 
         steps = (self._get_channels() * self._get_samples()) / len(self.data_dirs)
@@ -79,11 +79,14 @@ class Data_Loader():
             for j in range(len(_comp[0])):
                 comp_f.append([os.path.join(path_i,os.listdir(path_i)[i],_comp[i][j]) for i in range(len(_comp))])
             
-        train_data = [torch.stack(tv.io.read_image(file)[:3,:,:]) for file in comp_f]
+        train_data = [torch.stack(tv.io.read_image(file[i])[:3,:,:]) for file in comp_f]
         print(train_data)
 
         #TODO: LOAD COMP_F INTO TENSORS THIS CANNOT BE THE FASTEST WAY TO DO IT
         
+    def 
+
+
         quit()
 
         x_i: torch.Tensor = None
