@@ -96,7 +96,6 @@ class Data_Loader():
         return comp_f
 
     def tensor_stack(self, files) -> torch.Tensor:
-        #TODO: THIS NEEDS TO BE FINISHED
         """
         Iterates over a list of PNG paths, coverts and stacks Tensors
 
@@ -109,6 +108,7 @@ class Data_Loader():
         for file in files:
             for index in range(len(files[0])):
                 data_tensors.append(tv.io.read_image(file[index])[:3,:,:].type(torch.float))
+        print(data_tensors)
         return torch.stack(data_tensors).to(device)
 
     def _get_samples(self) -> int:
