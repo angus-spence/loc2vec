@@ -88,10 +88,11 @@ class Data_Loader():
             _comp = []
             for root, dirs, files in os.walk(path_i):
                 if files: _comp.append(files)
-            print(f'[{len(_comp)}, {len(_comp[0])}]')
             for j in range(len(_comp[0])):
                 comp_f.append([os.path.join(path_i,os.listdir(path_i)[i],_comp[i][j]) for i in range(len(_comp))])
             print(f'[{len(comp_f)}, {len(comp_f[0])}]')
+            print(comp_f)
+            print(comp_f[0])
         return comp_f
 
     def tensor_stack(self, files) -> torch.Tensor:
