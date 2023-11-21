@@ -15,7 +15,8 @@ loader = Data_Loader(
     shuffle=False
 )
 
-data = loader.load_from_dirs()
+synth, real = loader._theoretical_memory(torch.float32, (100000, 12, 3, 500, 500))
+print(f'SYNTHETIC: {synth*1e-9}GB - REAL: {real*1e-9}GB')
 
 quit()
 

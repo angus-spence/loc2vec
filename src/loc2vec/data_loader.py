@@ -20,6 +20,13 @@ path = r'C:\Users\Malcolm\Documents\Scripts\loc2vec\src\loc2vec\test_data'
 @dataclass
 class Data_Loader():
     #TODO: REALLY SHOULD MAKE THIS WORK FOR BOTH DIRS AND DIRECT FROM TENSOR FILES --> PROBABLY DONT HAVE TIME FOR THIS
+    #       NOT ENOUGH MEMORY -> NEED TO MAKE THIS WORK AS A BATCH PROCSESS INTO THE MODEL
+    #       MEED TO WORK OUT THE MAXIMUM BATCH SIZE THAT WILL THEORETICALLY COMPUTE
+    #       IF BATCH SIZE IS SPECIFIED -> NEED A FUNCTION TO CHECK THAT IT IS VALID -> IF NOT WE NEED TO CHANGE AMEND IT
+    #      
+    #       
+    #       
+    #       
     """
     Object for loading data to tensor
 
@@ -40,7 +47,7 @@ class Data_Loader():
     """
     x_path: str
     x_pos_path: str
-    batch_size: int
+    batch_size: int = None
     train_tensor_directory: str = None
     x_neg_path: str = None
     shuffle: bool = False
@@ -73,6 +80,9 @@ class Data_Loader():
         t_data = self.tensor_stack(files=self._get_data_files())
         print(t_data)
         print(t_data.shape)
+
+    def _check_batch_size():
+        return
 
     def _get_data_files(self) -> list:
         """
@@ -278,4 +288,49 @@ class Data_Loader():
     def _get_memory(self):
         return torch.cuda.memory_allocated(self.device)
 
+    def _tensory_memory(self, tensor: torch.Tensor) -> float:
+        """
+        """
+        return tensor.element_size() * tensor.nelement()
+    
+    def _theoretical_memory(self, dtype: torch, shape: tuple[int, ...]) -> int:
+        """
+        Evaluate the theoretical memory requirement of a tensor given it's dtype and shape
+
+        Parameters
+        ----------
+        dtype: torch
+            Data type of model input tensor
+        shape: tuple
+            Shape of the input tensor as a tuple
+        
+        
+        Returns
+        -------
+        memory: int
+            theoretical memory requirement in bytes
+        """
+
+        dtypes = {
+            torch.float: 32,
+            torch.float32: 32,
+            torch.FloatTensor: 32,
+            torch.float64: 64,
+            torch.double: 64,
+            torch.DoubleTensor: 64,
+            torch.float16: 16,
+            torch.half: 16,
+            torch.HalfTensor: 16,
+            torch.uint8: 8,
+            torch.ByteTensor: 8
+        }
+
+        bm = torch.rand(1,1).type(dtype)
+        bm = self._tensory_memory(bm)
+
+        size = 1
+        for ele in shape:
+            size *= ele
+        
+        return size * (dtypes[dtype] * 8), bm * size
     #self.data = torch.stack([torchvision.io.read_image(os.path.join(path, os.listdir(path)[i]))[:3, :, :] for i in range(len(os.listdir(path)))]).type(torch.float).to(device)
