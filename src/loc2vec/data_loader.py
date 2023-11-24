@@ -69,10 +69,14 @@ class Data_Loader():
         if not self.batch_size:
             self.batch_size = self._optim_batch(model, (self._image_shape()[0] * self._get_channels(), *self._image_shape()[1:]), (128), self._get_samples(), num_iterations=20)
 
-    def load(self) -> (torch.Tensor, torch.Tensor, torch.Tensor):
+    def __call__(self, batch_index) -> (torch.Tensor, torch.Tensor, torch.Tensor):
         """
         Returns tensor for (o) anchor, (+) anchor and (-) anchor for batch index
         
+        Parameters
+        ----------
+        batch_index
+            
         Returns
         -------
             anchors: tuple
