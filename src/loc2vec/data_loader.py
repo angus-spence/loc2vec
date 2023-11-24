@@ -118,7 +118,7 @@ class Data_Loader():
         print(data_tensors)
         return [torch.stack(data_tensors[i]) for i in range(len(data_tensors))]
 
-    def _optim_batch(self, model: nn.Module, input_shape: tuple[int, ...], output_shape: tuple[int, ...], samples: int, max_batch_size: int = None, num_iterations: int = 5, headroom_bias: int = None) -> int:
+    def _optim_batch(self, model: nn.Module, input_shape: tuple, output_shape: tuple, samples: int, max_batch_size: int = None, num_iterations: int = 5, headroom_bias: int = None) -> int:
         """
         Evaluates optimum batch size if self.batch_size not specified
         
@@ -157,7 +157,7 @@ class Data_Loader():
                 batch_size = batch_size // 2
                 break
         #try:
-            for _ in range(num_iterations):
+            for _ in tqdm(range(num_iterations), desc="Evaluating optimum batch size"):
                 anchor_i = torch.rand(*(batch_size, *input_shape), device=self.device)
                 anchor_pos = torch.rand(*(batch_size, *input_shape), device=self.device)
                 anchor_neg = torch.rand(*(batch_size, *input_shape), device=self.device)
@@ -346,7 +346,7 @@ class Data_Loader():
         """
         return tensor.element_size() * tensor.nelement()
     
-    def _theoretical_memory(self, dtype: torch, shape: tuple[int, ...]) -> int:
+    def _theoretical_memory(self, dtype: torch, shape: tuple) -> int:
         """
         Evaluate the theoretical memory requirement of a tensor given it's dtype and shape
 
