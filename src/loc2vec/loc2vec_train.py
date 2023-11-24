@@ -32,5 +32,5 @@ def train():
 if __name__ == "__main__":
     loader = Data_Loader(Params.X_PATH.value, x_pos_path=Params.X_POS_PATH.value)
     model = Network()
-    batch_size = loader._optim_batch(model, (3*12, 500, 500), (128), 100000, headroom_bias=250000000)
+    batch_size = loader._optim_batch(model, (3*12, 500, 500), (128), 100000, num_iterations=20, headroom_bias=250000000)
     print(batch_size)

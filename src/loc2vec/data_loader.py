@@ -156,20 +156,20 @@ class Data_Loader():
             if batch_size >= samples:
                 batch_size = batch_size // 2
                 break
-        #try:
-            for _ in tqdm(range(num_iterations), desc="Evaluating optimum batch size"):
-                anchor_i = torch.rand(*(batch_size, *input_shape), device=self.device)
-                anchor_pos = torch.rand(*(batch_size, *input_shape), device=self.device)
-                anchor_neg = torch.rand(*(batch_size, *input_shape), device=self.device)
-                outputs = model(anchor_i)
-                loss = lf(outputs, model(anchor_pos), model(anchor_neg))
-                loss.backward()
-                optimiser.step()
-                optimiser.zero_grad()
-            batch_size *= 2
-        #except RuntimeError:
-            #batch_size //= 2
-            break
+            try:
+                for _ in tqdm(range(num_iterations), desc="Evaluating optimum batch size"):
+                    anchor_i = torch.rand(*(batch_size, *input_shape), device=self.device)
+                    anchor_pos = torch.rand(*(batch_size, *input_shape), device=self.device)
+                    anchor_neg = torch.rand(*(batch_size, *input_shape), device=self.device)
+                    outputs = model(anchor_i)
+                    loss = lf(outputs, model(anchor_pos), model(anchor_neg))
+                    loss.backward()
+                    optimiser.step()
+                    optimiser.zero_grad()
+                batch_size *= 2
+            except RuntimeError:
+                batch_size //= 2
+                break
         del model, optimiser
         torch.cuda.empty_cache()
         return batch_size
