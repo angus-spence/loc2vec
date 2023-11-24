@@ -1,8 +1,8 @@
-from loc2vec.loc2vec_nn import TripletLossFunction as tlf
+from loc2vec.loc2vec_nn import Network, TripletLossFunction as tlf
+from loc2vec.config import Params
 
 import os
 import time
-import enum
 from itertools import groupby
 from dataclasses import dataclass
 
@@ -48,14 +48,39 @@ class Data_Loader():
     sample_limit: int = None
     x_neg_path: str = None
     shuffle: bool = False
+    paths: list = None
 
     def __post_init__(self):
+        """
+        Post-init for dataloader:
+            - identifies and assigns pytorch device
+            - evaluates data paths
+            - evaluates optimum batch size if self.batch_size not specified
+        """
         if torch.cuda.is_available():
             self.device = torch.device('cuda')
             self.cuda = True
         else: self.device = torch.device('cpu')
+        
         if self.x_neg_path: self.data_dirs = [self.x_path, self.x_pos_path, self.x_neg_path]
         else: self.data_dirs = [self.x_path, self.x_pos_path]
+        
+        model = Network()
+        if not self.batch_size:
+            self.batch_size = self._optim_batch(model, (self._image_shape()[0] * self._get_channels(), *self._image_shape()[1:]), (128), self._get_samples(), num_iterations=20)
+
+    def load(self) -> (torch.Tensor, torch.Tensor, torch.Tensor):
+        """
+        Returns tensor for (o) anchor, (+) anchor and (-) anchor for batch index
+        
+        Returns
+        -------
+            anchors: tuple
+            tuple of tensor objects for all anchors
+        """
+        #TODO:
+        #   - ITERATES THROUGH THE TRAINING DATA WITH SPECIFIED BATCH SIZE
+        #   - RETURNS BATCH AS TENSOR 
 
     def load_from_dirs(self) -> [torch.Tensor, torch.Tensor, torch.Tensor]:
         """
@@ -68,6 +93,7 @@ class Data_Loader():
         """
         #TODO: UPDATE THIS SO THAT IT EXCEPTS AN ARRAY-LIKE OBJECT FOR PATH
             # THIS WILL JUST CALL _GET_DATA_FILES AND TENSOR STACK METHODS
+            # DEPRECATED
         
         t = time.gmtime(time.time())
         print(f'{os.get_terminal_size()[0] * "-"}\nData Loader {t[3]}:{t[4]}:{t[5]} Device: {str(self.device).upper()}\n{os.get_terminal_size()[0] * "-"}')
@@ -77,6 +103,25 @@ class Data_Loader():
         t_data = self.tensor_stack(files=self._get_data_files())
         print(t_data)
         print(t_data.shape)
+
+    def tensor_stack(self, files) -> torch.Tensor:
+        """
+        Iterates over a list of PNG paths, coverts and stacks Tensors
+
+        Returns
+        -------
+        output: torch.Tensor
+            Tensor of model input data; this can be for (o) anchor, (+) anchor or (-) anchor sets
+        """
+        #TODO: THIS NEEDS TO BE UPDATED SO THAT IT ONLY LOADS A SPECIFIED BATCH FROM THE DATA AND LOADS TO TENSOR
+        try:
+            data_tensors = []
+            for file in files:
+                for index in range(len(file)): 
+                    data_tensors.append(tv.io.read_image(file[index])[:3,:,:].type(torch.float).to(self.device))
+        except Exception as e: print(e) 
+        print(data_tensors)
+        return [torch.stack(data_tensors[i]) for i in range(len(data_tensors))]
 
     def _check_batch_size():
         return
@@ -90,33 +135,18 @@ class Data_Loader():
         comp_f: list
             List of lists containing structured paths for all data inputs
         """
-        for path_i in self.data_dirs:
-            comp_f = []
-            _comp = []
-            for root, dirs, files in os.walk(path_i):
-                if files: _comp.append(files)
-            for j in range(len(_comp[0])):
-                comp_f.append([os.path.join(path_i,os.listdir(path_i)[i],_comp[i][j]) for i in range(len(_comp))])
-            print(f'[{len(comp_f)}, {len(comp_f[0])}]')
-        return comp_f
-
-    def tensor_stack(self, files) -> torch.Tensor:
-        """
-        Iterates over a list of PNG paths, coverts and stacks Tensors
-
-        Returns
-        -------
-        output: torch.Tensor
-            Tensor of model input data; this can be for (o) anchor, (+) anchor or (-) anchor sets
-        """
-        try:
-            data_tensors = []
-            for file in files:
-                for index in range(len(file)): 
-                    data_tensors.append(tv.io.read_image(file[index])[:3,:,:].type(torch.float).to(self.device))
-        except Exception as e: print(e) 
-        print(data_tensors)
-        return [torch.stack(data_tensors[i]) for i in range(len(data_tensors))]
+        if self.paths: return self.paths
+        else:
+            for path_i in self.data_dirs:
+                comp_f = []
+                _comp = []
+                for root, dirs, files in os.walk(path_i):
+                    if files: _comp.append(files)
+                for j in tqdm(range(len(_comp[0])), desc=f"BUILDING DATA PATHS FOR {str(path_i).upper()}"):
+                    comp_f.append([os.path.join(path_i,os.listdir(path_i)[i],_comp[i][j]) for i in range(len(_comp))])
+                print(f'   -> INPUT DATA SHAPE [{len(comp_f)}, {len(comp_f[0])}]')
+            self.paths = comp_f
+            return comp_f
 
     def _optim_batch(self, model: nn.Module, input_shape: tuple, output_shape: tuple, samples: int, max_batch_size: int = None, num_iterations: int = 5, headroom_bias: int = None) -> int:
         """
@@ -277,6 +307,17 @@ class Data_Loader():
             c, h, w = x.shape, y.shape, z.shape
             if c != h or c != w or h != w:
                 raise ValueError(f'All tensors must have the same shape. Got {c}, {h}, {w}.') 
+
+    def _image_shape(self) -> tuple:
+        """
+        Return the W x H dimension of samples
+
+        Returns
+        -------
+        image_shape: tuple
+            tuple of D x W x H (channels, width, height)
+        """
+        return tuple(tv.io.read_image(self._get_data_files()[0][0])[:3,:,:].shape) 
 
     def _check_dtype(self, x_i: torch.Tensor, x_pos: torch.Tensor, x_neg: torch.Tensor) -> bool:
         """
