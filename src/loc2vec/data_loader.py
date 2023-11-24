@@ -1,3 +1,5 @@
+from loc2vec.loc2vec_nn import TripletLossFunction as tlf
+
 import os
 import time
 import enum
@@ -9,13 +11,6 @@ from torch import nn
 import torch
 import torchvision as tv
 import matplotlib.pyplot as plt
-
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-path = r'C:\Users\Malcolm\Documents\Scripts\loc2vec\src\loc2vec\test_data'
-
-#data = torch.stack([torchvision.io.read_image(os.path.join(path, os.listdir(path)[i]))[:3, :, :] for i in range(len(os.listdir(path)))]).type(torch.float).to(device)
-#data = torch.utils.data.DataLoader(data, batch_size=120, shuffle=False)
 
 @dataclass
 class Data_Loader():
@@ -40,6 +35,8 @@ class Data_Loader():
         Path to directory where train tensors should be saved
     batch_size: int
         Batch size for tensors
+    sample_limit: int
+        Limit number of samples for model
     x_neg_path: [str, tuple, list]
         String or array-like object of strings for directory paths to negative anchor data
     shuffle: bool
@@ -48,7 +45,7 @@ class Data_Loader():
     x_path: str
     x_pos_path: str
     batch_size: int = None
-    train_tensor_directory: str = None
+    sample_limit: int = None
     x_neg_path: str = None
     shuffle: bool = False
 
@@ -116,10 +113,66 @@ class Data_Loader():
             data_tensors = []
             for file in files:
                 for index in range(len(file)): 
-                    data_tensors.append(tv.io.read_image(file[index])[:3,:,:].type(torch.float).to(device))
+                    data_tensors.append(tv.io.read_image(file[index])[:3,:,:].type(torch.float).to(self.device))
         except Exception as e: print(e) 
         print(data_tensors)
         return [torch.stack(data_tensors[i]) for i in range(len(data_tensors))]
+
+    def _optim_batch(self, model: nn.Module, input_shape: tuple[int, ...], output_shape: tuple[int, ...], samples: int, max_batch_size: int = None, num_iterations: int = 5, headroom_bias: int = None) -> int:
+        """
+        Evaluates optimum batch size if self.batch_size not specified
+        
+        Parameters
+        ----------
+        model: nn.Module
+            Nerual network model
+        input_shape: tuple[int, ...]
+            Shape of single data index
+        output_shape: tuple[int, ...]
+            Shaoe of output tensor
+        sample: int
+            Number of samples
+        max_batch_size: int = None
+            Maximum batch to evaluate
+        num_iterations: int
+            Times to iterate through the model in evaluation
+        headroom_bias: int
+            byte headroom required
+        
+        Returns
+        -------
+        batch_size: int
+            Optimum batch size
+        """
+        model.to(self.device)
+        model.train(True)
+        lf = tlf()
+        optimiser = torch.optim.Adam(model.parameters())
+        batch_size = 2
+        while True:
+            if max_batch_size is not None and batch_size >= max_batch_size:
+                batch_size = max_batch_size
+                break
+            if batch_size >= samples:
+                batch_size = batch_size // 2
+                break
+        #try:
+            for _ in range(num_iterations):
+                anchor_i = torch.rand(*(batch_size, *input_shape), device=self.device)
+                anchor_pos = torch.rand(*(batch_size, *input_shape), device=self.device)
+                anchor_neg = torch.rand(*(batch_size, *input_shape), device=self.device)
+                outputs = model(anchor_i)
+                loss = lf(outputs, model(anchor_pos), model(anchor_neg))
+                loss.backward()
+                optimiser.step()
+                optimiser.zero_grad()
+            batch_size *= 2
+        #except RuntimeError:
+            #batch_size //= 2
+            break
+        del model, optimiser
+        torch.cuda.empty_cache()
+        return batch_size
 
     def _get_samples(self) -> int:
         """

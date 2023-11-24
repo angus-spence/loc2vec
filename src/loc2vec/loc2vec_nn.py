@@ -1,4 +1,3 @@
-from loc2vec.data_loader import Data_Loader
 from loc2vec.config import Params
 
 from dataclasses import dataclass
@@ -8,24 +7,12 @@ import torch
 from torch import nn
 from tqdm import tqdm
 
-loader = Data_Loader(
-    x_path=Params.X_PATH.value,
-    x_pos_path=Params.X_POS_PATH.value,
-    batch_size=60,
-    shuffle=False
-)
-
-synth, real = loader._theoretical_memory(torch.float32, (100000, 12, 3, 500, 500))
-print(f'SYNTHETIC: {synth*1e-9}GB - REAL: {real*1e-9}GB')
-
-quit()
-
 class Network(torch.nn.Module):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.model = nn.Sequential(
             nn.Dropout2d(0.5),
-            nn.Conv2d(3, 64, 1, stride=1, padding=0),
+            nn.Conv2d(36, 64, 1, stride=1, padding=0),
             nn.Conv2d(64, 64, 1, stride=1, padding=0),
             nn.Conv2d(64, 128, 3, stride=1, padding=1),
             nn.MaxPool2d(2, stride=2, padding=0),
@@ -95,25 +82,3 @@ class TripletLossFunction(nn.Module):
         distance_to_neg = self.calc_euclidean(anchor, anchor_neg)
         losses = torch.relu(distance_to_pos - distance_to_neg + self.margin)
         return losses.mean()
-    
-model = Network()
-optimiser = torch.optim.Adam(model.parameters(), lr=Params.LEARNING_RATE.value)
-criterion = TripletLossFunction()
-
-for epoch in tqdm(range(Params.EPOCHS.value), desc='Epochs'):
-    running_loss = []
-    for step, (anchor, anchor_pos, anchor_neg) in enumerate(tqdm(data, desc="Training", leave=False)):
-        x = anchor
-        x_pos = anchor_pos
-        x_neg = anchor_neg
-
-        x_out = model(x)
-        x_pos_out = model(x_pos)
-        x_neg_out = model(x_neg)
-
-        loss = criterion(x_out, x_pos_out, x_neg_out)
-        loss.backward()
-        optimiser.step()
-
-        running_loss.append(loss.cpu().detach().numpy())
-        print(f'Epoch: {epoch+1}/{Params.EPOCHS.value} - Loss: {round(np.mean(running_loss), 5)}')
