@@ -49,7 +49,6 @@ class Data_Loader():
     shuffle: bool = False
     paths: list = None
     _batch_index: int = 0
-    _batches: int = None
     _iter_index: int = 0
 
     def __post_init__(self):
@@ -97,7 +96,8 @@ class Data_Loader():
         """
         if self._iter_index < len(self) // self.batch_size:
             self._iter_index += self.batch_size
-            return self._get_data_files()[self._iter_index-self.batch_size:self._iter_index]
+            path = self._get_data_files()[self._iter_index-self.batch_size:self._iter_index]
+            return self.tensor_stack(path)
         else:
             self._iter_index = 0
             raise StopIteration
