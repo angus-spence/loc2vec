@@ -49,6 +49,7 @@ class Data_Loader():
     shuffle: bool = False
     paths: list = None
     _batch_index: int = 0
+    _batches: int = None
     _iter_index: int = 0
 
     def __post_init__(self):
