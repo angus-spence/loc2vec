@@ -10,7 +10,6 @@ from tqdm import tqdm
 from torch import nn
 import torch
 import torchvision as tv
-import matplotlib.pyplot as plt
 
 @dataclass
 class Data_Loader():
@@ -49,13 +48,16 @@ class Data_Loader():
     x_neg_path: str = None
     shuffle: bool = False
     paths: list = None
+    _batch_index: int = 0
+    _iter_index: int = 0
 
     def __post_init__(self):
         """
         Post-init for dataloader:
-            - identifies and assigns pytorch device
-            - evaluates data paths
-            - evaluates optimum batch size if self.batch_size not specified
+            - Identifies and assigns pytorch device
+            - Evaluates data paths
+            - Evaluates optimum batch size if self.batch_size not specified
+            - 
         """
         if torch.cuda.is_available():
             self.device = torch.device('cuda')
@@ -68,23 +70,70 @@ class Data_Loader():
         model = Network()
         if not self.batch_size:
             self.batch_size = self._optim_batch(model, (self._image_shape()[0] * self._get_channels(), *self._image_shape()[1:]), (128), self._get_samples(), num_iterations=20)
+        del model
 
+    def __len__(self):
+        return len(self._get_data_files())
+    
     def __call__(self, batch_index) -> (torch.Tensor, torch.Tensor, torch.Tensor):
         """
-        Returns tensor for (o) anchor, (+) anchor and (-) anchor for batch index
-        
-        Parameters
-        ----------
-        batch_index
-            
+        Returns tensor for (o) anchor, (+) anchor and (-) anchor for specific batch index
+        """
+    
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        """
+        Returns next tensor for (o) anchor, (+) anchor and (-) anchor in batch iterator
+
         Returns
         -------
             anchors: tuple
             tuple of tensor objects for all anchors
         """
-        #TODO:
-        #   - ITERATES THROUGH THE TRAINING DATA WITH SPECIFIED BATCH SIZE
-        #   - RETURNS BATCH AS TENSOR 
+        if self._iter_index < len(self) // self.batch_size:
+            self._iter_index += self.batch_size
+            return self._get_data_files()[self._iter_index-self.batch_size:self._iter_index]
+        else:
+            self._iter_index = 0
+            raise StopIteration
+
+    def __reverse__(self):
+        self._batch_index -= 1
+        return self
+
+    @property
+    def batches(self) -> int:
+        """
+        Returns number of batches
+        """
+        return self._batches
+
+    @batches.setter
+    def batches(self) -> int:
+        """
+        Returns number of batches
+        """
+        self._batches = len(self) // self.batch_size
+
+    @property
+    def _batch_dropout(self):
+        return self._batch_dropout
+
+    @_batch_dropout.setter
+    def _batch_dropout(self):
+        self._batch_dropout = len(self) - (len(self) // self.batch_size)
+
+    @property
+    def shape(self) -> tuple:
+        """
+        """
+        return self._shape
+    
+    @shape.setter
+    def shape(self):
+        self._shape = self._image_shape()
 
     def load_from_dirs(self) -> [torch.Tensor, torch.Tensor, torch.Tensor]:
         """
