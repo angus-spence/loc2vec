@@ -105,17 +105,12 @@ class Data_Loader():
 
     @property
     def batches(self) -> int:
-        """
-        Returns number of batches
-        """
+        if not self._batches: self.batches()
         return self._batches
 
     @batches.setter
     def batches(self) -> int:
-        """
-        Returns number of batches
-        """
-        self._batches = len(self) // self.batch_size
+        self._batches = (len(self) - self._batch_dropout) // self.batch_size
 
     @property
     def _batch_dropout(self):
