@@ -73,7 +73,7 @@ class Data_Loader():
             self.batch_size = self._optim_batch(model, (self._image_shape()[0] * self._get_channels(), *self._image_shape()[1:]), (128), self._get_samples(), num_iterations=20)
         del model
 
-
+        self.batches = (len(self) - self._batch_dropout()) // self.batch_size
 
     def __len__(self):
         return len(self._get_data_files())
@@ -106,32 +106,16 @@ class Data_Loader():
         self._batch_index -= 1
         return self
 
-    @property
-    def batches(self) -> int:
-        if not self.batches: self.batches.setter()
-        return self._batches
-
-    @batches.setter
-    def batches(self, value) -> int:
-        self._batches = (len(self) - self._batch_dropout) // self.batch_size
-
-    @property
     def _batch_dropout(self):
-        return self._batch_dropout
-
-    @_batch_dropout.setter
-    def _batch_dropout(self):
-        self._batch_dropout = len(self) - (len(self) // self.batch_size)
-
-    @property
-    def shape(self) -> tuple:
         """
+        Evaluates number of indicies to drop to ensure batch size is modulo of total indicies
+        
+        Returns
+        -------
+        batch_dropout: int
+            Number of indicies to drop
         """
-        return self._shape
-    
-    @shape.setter
-    def shape(self):
-        self._shape = self._image_shape()
+        return len(self) - (len(self) // self.batch_size)
 
     def load_from_dirs(self) -> [torch.Tensor, torch.Tensor, torch.Tensor]:
         """
