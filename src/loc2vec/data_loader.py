@@ -73,6 +73,8 @@ class Data_Loader():
             self.batch_size = self._optim_batch(model, (self._image_shape()[0] * self._get_channels(), *self._image_shape()[1:]), (128), self._get_samples(), num_iterations=20)
         del model
 
+
+
     def __len__(self):
         return len(self._get_data_files())
     
@@ -106,11 +108,11 @@ class Data_Loader():
 
     @property
     def batches(self) -> int:
-        if not self._batches: self.batches()
+        if not self.batches: self.batches.setter()
         return self._batches
 
     @batches.setter
-    def batches(self) -> int:
+    def batches(self, value) -> int:
         self._batches = (len(self) - self._batch_dropout) // self.batch_size
 
     @property
