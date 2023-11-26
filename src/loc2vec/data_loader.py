@@ -12,15 +12,7 @@ import torch
 import torchvision as tv
 
 @dataclass
-class Data_Loader():
-    #TODO: REALLY SHOULD MAKE THIS WORK FOR BOTH DIRS AND DIRECT FROM TENSOR FILES --> PROBABLY DONT HAVE TIME FOR THIS
-    #       NOT ENOUGH MEMORY -> NEED TO MAKE THIS WORK AS A BATCH PROCSESS INTO THE MODEL
-    #       MEED TO WORK OUT THE MAXIMUM BATCH SIZE THAT WILL THEORETICALLY COMPUTE
-    #       IF BATCH SIZE IS SPECIFIED -> NEED A FUNCTION TO CHECK THAT IT IS VALID -> IF NOT WE NEED TO CHANGE AMEND IT
-    #      
-    #       
-    #       
-    #       
+class Data_Loader():     
     """
     Object for loading data to tensor
 
@@ -67,9 +59,11 @@ class Data_Loader():
         if self.x_neg_path: self.data_dirs = [self.x_path, self.x_pos_path, self.x_neg_path]
         else: self.data_dirs = [self.x_path, self.x_pos_path]
         
+        print(f'   -> DEVICE: {self.device}')
+
         model = Network()
         if not self.batch_size:
-            self.batch_size = self._optim_batch(model, (self._image_shape()[0] * self._get_channels(), *self._image_shape()[1:]), (128), self._get_samples(), num_iterations=20)
+            self.batch_size = self._optim_batch(model, (self._image_shape()[0] * self._get_channels(), *self._image_shape()[1:]), self._get_samples(), num_iterations=20)
         del model
 
         self.batches = (len(self) - self._batch_dropout()) // self.batch_size
@@ -96,14 +90,15 @@ class Data_Loader():
         """
         if self._iter_index < len(self) // self.batch_size:
             self._iter_index += self.batch_size
+            print(self._get_data_files())
             path = self._get_data_files()[self._iter_index-self.batch_size:self._iter_index]
-            return self.tensor_stack(path)
+            return self._tensor_stack(path)
         else:
             self._iter_index = 0
             raise StopIteration
 
     def __reverse__(self):
-        self._batch_index -= 1
+        self._batch_index -= self.batch_size
         return self
 
     def _batch_dropout(self):
@@ -117,29 +112,7 @@ class Data_Loader():
         """
         return len(self) - (len(self) // self.batch_size)
 
-    def load_from_dirs(self) -> [torch.Tensor, torch.Tensor, torch.Tensor]:
-        """
-        Loads PNG to tensors
-
-        Returns
-        -------
-        torch.Tensor
-            Tensors for anchors
-        """
-        #TODO: UPDATE THIS SO THAT IT EXCEPTS AN ARRAY-LIKE OBJECT FOR PATH
-            # THIS WILL JUST CALL _GET_DATA_FILES AND TENSOR STACK METHODS
-            # DEPRECATED
-        
-        t = time.gmtime(time.time())
-        print(f'{os.get_terminal_size()[0] * "-"}\nData Loader {t[3]}:{t[4]}:{t[5]} Device: {str(self.device).upper()}\n{os.get_terminal_size()[0] * "-"}')
-        print(f'Loading to torch:')
-
-        steps = (self._get_channels() * self._get_samples()) / len(self.data_dirs)
-        t_data = self.tensor_stack(files=self._get_data_files())
-        print(t_data)
-        print(t_data.shape)
-
-    def tensor_stack(self, files) -> torch.Tensor:
+    def _tensor_stack(self, files) -> torch.Tensor:
         """
         Iterates over a list of PNG paths, coverts and stacks Tensors
 
@@ -148,14 +121,13 @@ class Data_Loader():
         output: torch.Tensor
             Tensor of model input data; this can be for (o) anchor, (+) anchor or (-) anchor sets
         """
-        #TODO: THIS NEEDS TO BE UPDATED SO THAT IT ONLY LOADS A SPECIFIED BATCH FROM THE DATA AND LOADS TO TENSOR
+        #TODO: THIS NEEDS TO BE UPDATED SO IT WORKS WITH THE ITERATOR
         try:
             data_tensors = []
-            for file in files:
-                for index in range(len(file)): 
-                    data_tensors.append(tv.io.read_image(file[index])[:3,:,:].type(torch.float).to(self.device))
+            for channel in files:
+                for index in range(len(channel[0])): 
+                    data_tensors.append(tv.io.read_image(channel[index])[:3,:,:].type(torch.float).to(self.device))
         except Exception as e: print(e) 
-        print(data_tensors)
         return [torch.stack(data_tensors[i]) for i in range(len(data_tensors))]
 
     def _check_batch_size():
@@ -183,7 +155,7 @@ class Data_Loader():
             self.paths = comp_f
             return comp_f
 
-    def _optim_batch(self, model: nn.Module, input_shape: tuple, output_shape: tuple, samples: int, max_batch_size: int = None, num_iterations: int = 5, headroom_bias: int = None) -> int:
+    def _optim_batch(self, model: nn.Module, input_shape: tuple, samples: int, max_batch_size: int = None, num_iterations: int = 5, headroom_bias: int = None) -> int:
         """
         Evaluates optimum batch size if self.batch_size not specified
         
@@ -193,9 +165,7 @@ class Data_Loader():
             Nerual network model
         input_shape: tuple[int, ...]
             Shape of single data index
-        output_shape: tuple[int, ...]
-            Shaoe of output tensor
-        sample: int
+        samples: int
             Number of samples
         max_batch_size: int = None
             Maximum batch to evaluate
@@ -209,6 +179,8 @@ class Data_Loader():
         batch_size: int
             Optimum batch size
         """
+        #TODO: THIS NEEDS SOME DEBUGGING -> USING A TRY IS NOT A GOOD IDEA HERE, IDEALLY WE CAN ISOLATE MEMORY
+        #       EXCEPTIONS AS THIS ONLY WORKS IF MEMORY EXCEPTIONS ARE THE ONLY EXCEPTIONS
         model.to(self.device)
         model.train(True)
         lf = tlf()
@@ -231,12 +203,13 @@ class Data_Loader():
                     loss.backward()
                     optimiser.step()
                     optimiser.zero_grad()
-                batch_size *= 2
+                    batch_size *= 2
             except RuntimeError:
                 batch_size //= 2
                 break
         del model, optimiser
         torch.cuda.empty_cache()
+        print(f'Optimum batch size: {batch_size}')
         return batch_size
 
     def _get_samples(self) -> int:
