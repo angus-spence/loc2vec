@@ -16,11 +16,7 @@ def train():
         running_loss = []
         
         for batch in range(loader.batches):
-            print(next(loader).shape)
-            print(len(loader.data_dirs))
-            print(torch.split(next(loader), len(loader.data_dirs)))
-            print(len(torch.split(next(loader), len(loader.data_dirs))))
-            o, plus, neg = torch.split(next(loader), len(loader.data_dirs))
+            o, plus, neg = next(loader)
             o, plus, neg = (model(o), model(plus), model(neg))
 
             loss = criterion(o, plus, neg)

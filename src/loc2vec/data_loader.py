@@ -1,8 +1,7 @@
 from loc2vec.loc2vec_nn import Network, TripletLossFunction as tlf
-from loc2vec.config import Params
 
 import os
-import time
+import random
 from itertools import groupby
 from dataclasses import dataclass
 
@@ -69,7 +68,7 @@ class Data_Loader():
         self.batches = (len(self) - self._batch_dropout()) // self.batch_size
 
     def __len__(self):
-        return len(self._get_data_files())
+        return len(self._get_data_files())//len(self.data_dirs)
     
     def __call__(self, batch_index) -> (torch.Tensor, torch.Tensor, torch.Tensor):
         """
@@ -93,8 +92,12 @@ class Data_Loader():
         # SO WE CAN JUST PARSE BY THE LEN(SELF) BUT THIS IS BODGEY 
         if self._iter_index < len(self) // self.batch_size:
             self._iter_index += self.batch_size
-            path = self._get_data_files()[self._iter_index-self.batch_size:self._iter_index]
-            return self._tensor_stack(path)
+            path = self._get_data_files()
+            if not self.x_neg_path: x_neg = random.shuffle(path[:len(self)])
+            else: x_neg = path[len(self)*2:]
+            x_pos = path[:len(self)]
+            x_neg = path[len(self):len(self)*2]
+            return self._tensor_stack(x_pos), self._tensor_stack(x_neg), self._tensor_stack(x_neg)
         else:
             self._iter_index = 0
             raise StopIteration
@@ -134,7 +137,7 @@ class Data_Loader():
 
     def _get_data_files(self) -> list:
         """
-        Evaluate paths for all data inputs
+        Evaluate paths for all data inputs and returns to list
 
         Returns
         -------
@@ -143,14 +146,14 @@ class Data_Loader():
         """
         if self.paths: return self.paths
         else:
-            for path_i in self.data_dirs:
-                comp_f = []
+            comp_f = []
+            for path_i in self.data_dirs:  
                 _comp = []
                 for root, dirs, files in os.walk(path_i):
                     if files: _comp.append(files)
                 for j in tqdm(range(len(_comp[0])), desc=f"BUILDING DATA PATHS FOR {str(path_i).upper()}"):
                     comp_f.append([os.path.join(path_i,os.listdir(path_i)[i],_comp[i][j]) for i in range(len(_comp))])
-                print(f'   -> INPUT DATA SHAPE [{len(comp_f)}, {len(comp_f[0])}]')
+            print(f'   -> INPUT SHAPE [{len(comp_f)}, {len(comp_f[0])})]')
             self.paths = comp_f
             return comp_f
 
@@ -385,6 +388,13 @@ class Data_Loader():
                     x, y, z = x.to(self.device), y.to(self.device), z.to(self.device)
             except:
                 raise ValueError(f'All tensors must be on the same device. Got {c}, {h}, {w}.')
+
+    @staticmethod
+    def _chunk(list, n):
+        """
+        """
+        for i in range(0, len(list), n): 
+            yield list[i:i + n]
 
     def _get_memory(self):
         return torch.cuda.memory_allocated(self.device)
