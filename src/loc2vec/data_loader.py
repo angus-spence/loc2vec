@@ -151,7 +151,7 @@ class Data_Loader():
                 _comp = []
                 for root, dirs, files in os.walk(path_i):
                     if files: _comp.append(files)
-                for j in tqdm(range(len(_comp[0])), desc=f"BUILDING DATA PATHS FOR {str(path_i).upper()}"):
+                for j in tqdm(range(len(_comp[0])), desc=f"BUILDING PATHS FOR {str(path_i).upper()}"):
                     comp_f.append([os.path.join(path_i,os.listdir(path_i)[i],_comp[i][j]) for i in range(len(_comp))])
             print(f'   -> INPUT SHAPE [{len(comp_f)}, {len(comp_f[0])})]')
             self.paths = comp_f

@@ -7,7 +7,7 @@ import numpy as np
 from tqdm import tqdm
 
 def train():
-    loader = Data_Loader(Params.X_PATH.value, x_pos_path=Params.X_POS_PATH.value, batch_size=4)
+    loader = Data_Loader(Params.X_PATH.value, x_pos_path=Params.X_POS_PATH.value)
     model = Network()
     optimiser = torch.optim.Adam(model.parameters(), lr=Params.LEARNING_RATE.value)
     criterion = TripletLossFunction()
