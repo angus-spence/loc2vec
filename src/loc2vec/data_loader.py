@@ -62,6 +62,7 @@ class Data_Loader():
 
         model = Network()
         if not self.batch_size:
+            print()
             self.batch_size = self._optim_batch(model, (self._image_shape()[0] * self._get_channels(), *self._image_shape()[1:]), self._get_samples(), num_iterations=20)
         del model
 

@@ -23,6 +23,8 @@ def train():
             loss.backward()
             optimiser.step()
 
+            del o, plus, neg
+
             running_loss.append(loss.cpu().detach().numpy())
             print(f'Epoch: {epoch+1}/{Params.EPOCHS.value} - Loss: {round(np.mean(running_loss), 5)}')
             
