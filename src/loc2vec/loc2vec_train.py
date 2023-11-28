@@ -16,6 +16,7 @@ def train():
         running_loss = []
         
         for batch in range(loader.batches):
+            print(next(loader))
             o, plus, neg = torch.split(next(loader), len(loader.data_dirs))
             o, plus, neg = (model(o), model(plus), model(neg))
 
