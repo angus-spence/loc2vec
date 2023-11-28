@@ -81,16 +81,18 @@ class Data_Loader():
 
     def __next__(self):
         """
-        Returns next tensor for (o) anchor, (+) anchor and (-) anchor in batch iterator
+        Returns tensor of (o) anchor, (+) anchor and (-) anchor in batch iterator
 
         Returns
         -------
             anchors: tuple
             tuple of tensor objects for all anchors
         """
+        # TODO: THIS IS NOT A VERY GOOD IMPLEMENTATION. IDEALLY NEXT WOULD RETURN A TUPLE OF
+        # OF TENORS FOR THE ANCHOR TYPES, INSTEAD THIS JUST STACKS THEM ON TOP OF EACH OTHER
+        # SO WE CAN JUST PARSE BY THE LEN(SELF) BUT THIS IS BODGEY 
         if self._iter_index < len(self) // self.batch_size:
             self._iter_index += self.batch_size
-            print(self._get_data_files())
             path = self._get_data_files()[self._iter_index-self.batch_size:self._iter_index]
             return self._tensor_stack(path)
         else:
@@ -121,14 +123,11 @@ class Data_Loader():
         output: torch.Tensor
             Tensor of model input data; this can be for (o) anchor, (+) anchor or (-) anchor sets
         """
-        #TODO: THIS NEEDS TO BE UPDATED SO IT WORKS WITH THE ITERATOR
-        try:
-            data_tensors = []
-            for channel in files:
-                for index in range(len(channel[0])): 
-                    data_tensors.append(tv.io.read_image(channel[index])[:3,:,:].type(torch.float).to(self.device))
-        except Exception as e: print(e) 
-        return [torch.stack(data_tensors[i]) for i in range(len(data_tensors))]
+        data_tensors = []
+        for channel in files:
+            for index in range(len(channel)): 
+                data_tensors.append(tv.io.read_image(channel[index])[:3,:,:].type(torch.float).to(self.device)) 
+        return torch.stack(data_tensors)
 
     def _check_batch_size():
         return
