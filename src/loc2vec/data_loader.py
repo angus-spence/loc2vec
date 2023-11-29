@@ -146,7 +146,7 @@ class Data_Loader():
                 counter += 1
                 print(f'LOADED: {counter}/{(self.batch_size*self.in_channels)} @ {round(torch.cuda.memory_allocated()*1e-9, 4)}GB', end='\r') 
                 data_tensors.append(tv.io.read_image(channel[index])[:3,:,:].type(torch.float).to(self.device)) 
-        return torch.stack(data_tensors)
+        return torch.stack(data_tensors).reshape(self.batch_size, self.in_channels, *(self._image_shape()[1:]))
 
     def _check_batch_size():
         return
