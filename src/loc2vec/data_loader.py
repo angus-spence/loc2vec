@@ -95,7 +95,7 @@ class Data_Loader():
         if self._iter_index < len(self) // self.batch_size:
             self._iter_index += self.batch_size
             path = self._get_data_files()
-            if not self.x_neg_path: x_neg = random.shuffle(path)[:len(self)]
+            if not self.x_neg_path: x_neg = random.shuffle(path, len(path))[:len(self)]
             else: x_neg = path[len(self)*2:]
             x = path[:len(self)]
             x_pos = path[len(self):len(self)*2]
