@@ -42,6 +42,8 @@ class Data_Loader():
     in_channels: int = None
     _batch_index: int = 0
     _iter_index: int = 0
+    _s: int = 0
+    _e: int = 0
 
 
     def __post_init__(self):
@@ -68,6 +70,7 @@ class Data_Loader():
             print(f'IMAGE SHAPE: {self._image_shape()} CHANNELS: {self._get_channels()} SAMPLES: {self._get_samples()}')
             model = Network(in_channels=self.in_channels) 
             self.batch_size = self._optim_batch(model, (self._image_shape()[0] * self._get_channels(), *self._image_shape()[1:]), self._get_samples(), num_iterations=20)
+            self._e = self.batch_size
             del model
 
         self.batches = (len(self) - self._batch_dropout()) // self.batch_size
@@ -92,7 +95,6 @@ class Data_Loader():
             anchors: tuple
             tuple of tensor objects for all anchors
         """
-        s, e = 0, self.batch_size
         if self._iter_index < len(self) // self.batch_size:
             self._iter_index += self.batch_size
             path = self._get_data_files()
@@ -101,10 +103,11 @@ class Data_Loader():
             x = path[:len(self)]
             x_pos = path[len(self):len(self)*2]
 
-            x_out = x[s:e]
-            x_pos_out = x_pos[s:e]
-            x_neg_out = x_neg[s:e]
-            s, e += self.batch_size
+            x_out = x[self._s:self._e]
+            x_pos_out = x_pos[self._s:self._e]
+            x_neg_out = x_neg[self._s:self._e]
+            self._s += self.batch_size
+            self._e += self.batch_size
 
             return self._tensor_stack(x_out), self._tensor_stack(x_pos_out), self._tensor_stack(x_neg_out)
         else:
