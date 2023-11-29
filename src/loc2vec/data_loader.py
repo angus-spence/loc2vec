@@ -201,9 +201,10 @@ class Data_Loader():
                 break
             try:
                 for _ in tqdm(range(num_iterations), desc="Evaluating optimum batch size"):
-                    anchor_i = torch.rand(*(batch_size, *input_shape), device=self.device)
-                    anchor_pos = torch.rand(*(batch_size, *input_shape), device=self.device)
-                    anchor_neg = torch.rand(*(batch_size, *input_shape), device=self.device)
+                    anchor_i = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
+                    anchor_pos = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
+                    anchor_neg = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
+                    print(f'TESTING SHAPE: {anchor_i.shape}')
                     outputs = model(anchor_i)
                     loss = lf(outputs, model(anchor_pos), model(anchor_neg))
                     loss.backward()
