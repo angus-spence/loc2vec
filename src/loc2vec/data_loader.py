@@ -130,9 +130,10 @@ class Data_Loader():
         """
         data_tensors = []
         for channel in files:
-            for index in range(len(channel)): 
+            for index in range(len(channel)):
+                print(f'{torch.cuda.memory_allocated()/1e-9}GB') 
                 data_tensors.append(tv.io.read_image(channel[index])[:3,:,:].type(torch.float).to(self.device)) 
-        return torch.stack(data_tensors).to(self.device)
+        return torch.stack(data_tensors)
 
     def _check_batch_size():
         return
@@ -204,7 +205,6 @@ class Data_Loader():
                     anchor_i = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
                     anchor_pos = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
                     anchor_neg = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
-                    print(f'TESTING SHAPE: {anchor_i.shape}')
                     outputs = model(anchor_i)
                     loss = lf(outputs, model(anchor_pos), model(anchor_neg))
                     loss.backward()
