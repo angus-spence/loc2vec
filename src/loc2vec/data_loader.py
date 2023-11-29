@@ -39,8 +39,10 @@ class Data_Loader():
     x_neg_path: str = None
     shuffle: bool = False
     paths: list = None
+    in_channels: int = None
     _batch_index: int = 0
     _iter_index: int = 0
+
 
     def __post_init__(self):
         """
@@ -60,10 +62,11 @@ class Data_Loader():
         
         print(f'   -> DEVICE: {self.device}')
 
-        
+        self.in_channels = self._image_shape()[0] * self._get_channels()
+
         if not self.batch_size:
             print(f'IMAGE SHAPE: {self._image_shape()} CHANNELS: {self._get_channels()} SAMPLES: {self._get_samples()}')
-            model = Network(in_channels=(self._image_shape()[0] * self._get_channels())) 
+            model = Network(in_channels=self.in_channels) 
             self.batch_size = self._optim_batch(model, (self._image_shape()[0] * self._get_channels(), *self._image_shape()[1:]), self._get_samples(), num_iterations=20)
             del model
 

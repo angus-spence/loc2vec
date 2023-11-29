@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 def train():
     loader = Data_Loader(Params.X_PATH.value, x_pos_path=Params.X_POS_PATH.value)
-    model = Network()
+    model = Network(in_channels=loader._im)
     optimiser = torch.optim.Adam(model.parameters(), lr=Params.LEARNING_RATE.value)
     criterion = TripletLossFunction()
 
@@ -16,7 +16,7 @@ def train():
         running_loss = []
         
         for batch in range(loader.batches):
-            o, plus, neg = next(loader)
+            o, plus, neg = next(loader.in_channels)
             print(f'{round(torch.cuda.memory_allocated()/1000/1000/1000,4)}GB')
             o, plus, neg = (model(o), model(plus), model(neg))
 
