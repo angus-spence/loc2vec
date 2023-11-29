@@ -97,9 +97,15 @@ class Data_Loader():
             path = self._get_data_files()
             if not self.x_neg_path: x_neg = random.shuffle(path[:len(self)])
             else: x_neg = path[len(self)*2:]
-            x_pos = path[:len(self)]
-            x_neg = path[len(self):len(self)*2]
-            return self._tensor_stack(x_pos), self._tensor_stack(x_neg), self._tensor_stack(x_neg)
+            x = path[:len(self)]
+            x_pos = path[len(self):len(self)*2]
+            x_neg = path[len(self)*2:]
+
+            print(f'X_NEG: [{len(x)}, {len(x[0])}')
+            print(f'X_NEG: [{len(x_pos)}, {len(x_pos[0])}')
+            print(f'X_NEG: [{len(x_neg)}, {len(x_neg[0])}')
+
+            return self._tensor_stack(x), self._tensor_stack(x_neg), self._tensor_stack(x_neg)
         else:
             self._iter_index = 0
             raise StopIteration
@@ -133,7 +139,7 @@ class Data_Loader():
         for channel in files:
             for index in range(len(channel)):
                 counter += 1
-                print(f'LOADED: {counter}/{self.batch_size*self.in_channels} @ {round(torch.cuda.memory_allocated()*1e-9, 4)}GB', end='\r') 
+                print(f'LOADED: {counter}/{3*(self.batch_size*self.in_channels)} @ {round(torch.cuda.memory_allocated()*1e-9, 4)}GB', end='\r') 
                 data_tensors.append(tv.io.read_image(channel[index])[:3,:,:].type(torch.float).to(self.device)) 
         return torch.stack(data_tensors)
 
