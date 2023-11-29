@@ -62,7 +62,6 @@ class Data_Loader():
 
         model = Network()
         if not self.batch_size:
-            print()
             self.batch_size = self._optim_batch(model, (self._image_shape()[0] * self._get_channels(), *self._image_shape()[1:]), self._get_samples(), num_iterations=20)
         del model
 
@@ -131,7 +130,7 @@ class Data_Loader():
         for channel in files:
             for index in range(len(channel)): 
                 data_tensors.append(tv.io.read_image(channel[index])[:3,:,:].type(torch.float).to(self.device)) 
-        return torch.stack(data_tensors)
+        return torch.stack(data_tensors).to(self.device)
 
     def _check_batch_size():
         return
