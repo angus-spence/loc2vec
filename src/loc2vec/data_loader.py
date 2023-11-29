@@ -208,8 +208,7 @@ class Data_Loader():
                     optimiser.zero_grad()
                     batch_size *= 2
             except RuntimeError as e:
-                print(str(e)[:17])
-                if str(e)[:17] == "CUDA out of memory": 
+                if str(e)[:18] == "CUDA out of memory": 
                     batch_size //= 2
                     break
                 else:
