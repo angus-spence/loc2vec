@@ -131,8 +131,7 @@ class Data_Loader():
         data_tensors = []
         for channel in files:
             for index in range(len(channel)):
-                print()
-                print(f'\r{torch.cuda.memory_allocated()*1e-9}GB') 
+                print(f'\r{round(torch.cuda.memory_allocated()*1e-9, 4)}GB') 
                 data_tensors.append(tv.io.read_image(channel[index])[:3,:,:].type(torch.float).to(self.device)) 
         return torch.stack(data_tensors)
 
