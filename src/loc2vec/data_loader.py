@@ -60,10 +60,12 @@ class Data_Loader():
         
         print(f'   -> DEVICE: {self.device}')
 
-        model = Network()
+        
         if not self.batch_size:
+            print(f'IMAGE SHAPE: {self._image_shape()} CHANNELS: {self._get_channels()} SAMPLES: {self._get_samples()}')
+            model = Network(in_channels=(self._image_shape()[0] * self._get_channels())) 
             self.batch_size = self._optim_batch(model, (self._image_shape()[0] * self._get_channels(), *self._image_shape()[1:]), self._get_samples(), num_iterations=20)
-        del model
+            del model
 
         self.batches = (len(self) - self._batch_dropout()) // self.batch_size
 
@@ -87,9 +89,6 @@ class Data_Loader():
             anchors: tuple
             tuple of tensor objects for all anchors
         """
-        # TODO: THIS IS NOT A VERY GOOD IMPLEMENTATION. IDEALLY NEXT WOULD RETURN A TUPLE OF
-        # OF TENORS FOR THE ANCHOR TYPES, INSTEAD THIS JUST STACKS THEM ON TOP OF EACH OTHER
-        # SO WE CAN JUST PARSE BY THE LEN(SELF) BUT THIS IS BODGEY 
         if self._iter_index < len(self) // self.batch_size:
             self._iter_index += self.batch_size
             path = self._get_data_files()
@@ -153,7 +152,7 @@ class Data_Loader():
                     if files: _comp.append(files)
                 for j in tqdm(range(len(_comp[0])), desc=f"BUILDING PATHS FOR {str(path_i).upper()}"):
                     comp_f.append([os.path.join(path_i,os.listdir(path_i)[i],_comp[i][j]) for i in range(len(_comp))])
-            print(f'   -> INPUT SHAPE [{len(comp_f)}, {len(comp_f[0])})]')
+            print(f'   -> INPUT SHAPE [{len(comp_f)}, {len(comp_f[0])}]')
             self.paths = comp_f
             return comp_f
 
@@ -183,6 +182,8 @@ class Data_Loader():
         """
         #TODO: THIS NEEDS SOME DEBUGGING -> USING A TRY IS NOT A GOOD IDEA HERE, IDEALLY WE CAN ISOLATE MEMORY
         #       EXCEPTIONS AS THIS ONLY WORKS IF MEMORY EXCEPTIONS ARE THE ONLY EXCEPTIONS
+        #
+        #       THIS IS SLIGHTLY BETTER NOW BUT STILL CRAP
         model.to(self.device)
         model.train(True)
         lf = tlf()
@@ -207,9 +208,13 @@ class Data_Loader():
                     optimiser.zero_grad()
                     batch_size *= 2
             except RuntimeError as e:
-                print(str(e[:17]))
-                batch_size //= 2
-                break
+                if str(e)[:17] == "CUDA out of memory": 
+                    batch_size //= 2
+                    break
+                else:
+                    print(e)
+                    quit()
+
         del model, optimiser
         torch.cuda.empty_cache()
         print(f'Optimum batch size: {batch_size}')
@@ -282,7 +287,7 @@ class Data_Loader():
             c = []
             for path_i in self.data_dirs:
                 for root, dirs, files in os.walk(path_i):
-                    c.append(len(dirs))
+                    if dirs: c.append(len(dirs))
         c_g = groupby(c)
         return next(c_g, True) and not next(c_g, False), c[0]
 
