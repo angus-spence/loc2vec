@@ -206,7 +206,8 @@ class Data_Loader():
                     optimiser.step()
                     optimiser.zero_grad()
                     batch_size *= 2
-            except RuntimeError:
+            except RuntimeError as e:
+                print(str(e[:17]))
                 batch_size //= 2
                 break
         del model, optimiser
