@@ -16,7 +16,7 @@ def train():
         running_loss = []
         
         for batch in range(loader.batches):
-            o, plus, neg = next(loader.in_channels)
+            o, plus, neg = next(loader)
             print(f'{round(torch.cuda.memory_allocated()/1000/1000/1000,4)}GB')
             o, plus, neg = (model(o), model(plus), model(neg))
 
