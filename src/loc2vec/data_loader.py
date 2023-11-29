@@ -147,7 +147,7 @@ class Data_Loader():
                 counter += 1
                 print(f'LOADED: {counter}/{(self.batch_size*self.in_channels)} @ {round(torch.cuda.memory_allocated()*1e-9, 4)}GB', end='\r') 
                 channels.append(tv.io.read_image(channel[index])[:3,:,:].type(torch.float).to(self.device)) 
-            batches.append(torch.stack(channels))
+        batches.append(torch.stack(channels))
         return torch.stack(batches)
 
     def _check_batch_size():
