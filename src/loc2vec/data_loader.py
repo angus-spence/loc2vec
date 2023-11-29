@@ -133,7 +133,7 @@ class Data_Loader():
         for channel in files:
             for index in range(len(channel)):
                 counter += 1
-                print(f'LOADED: {counter}/{self.batch_size*self.in_channels} @ {round(torch.cuda.memory_allocated()*1e-9, 4)}GB\r') 
+                print(f'LOADED: {counter}/{self.batch_size*self.in_channels} @ {round(torch.cuda.memory_allocated()*1e-9, 4)}GB', end='\r') 
                 data_tensors.append(tv.io.read_image(channel[index])[:3,:,:].type(torch.float).to(self.device)) 
         return torch.stack(data_tensors)
 
