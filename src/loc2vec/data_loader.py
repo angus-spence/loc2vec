@@ -95,6 +95,7 @@ class Data_Loader():
             anchors: tuple
             tuple of tensor objects for all anchors
         """
+        #TODO: THIS LOADS TO BATCH RATHER THAN CHANNEL, WE NEED TO STACK THESE TO A CHANNEL
         if self._iter_index < len(self) // self.batch_size:
             self._iter_index += self.batch_size
             path = self._get_data_files()
@@ -143,7 +144,7 @@ class Data_Loader():
         for channel in files:
             for index in range(len(channel)):
                 counter += 1
-                print(f'LOADED: {counter}/{3*(self.batch_size*self.in_channels)} @ {round(torch.cuda.memory_allocated()*1e-9, 4)}GB', end='\r') 
+                print(f'LOADED: {counter}/{(self.batch_size*self.in_channels)} @ {round(torch.cuda.memory_allocated()*1e-9, 4)}GB', end='\r') 
                 data_tensors.append(tv.io.read_image(channel[index])[:3,:,:].type(torch.float).to(self.device)) 
         return torch.stack(data_tensors)
 
@@ -168,7 +169,6 @@ class Data_Loader():
                     if files: _comp.append(files)
                 for j in tqdm(range(len(_comp[0])), desc=f"BUILDING PATHS FOR {str(path_i).upper()}"):
                     comp_f.append([os.path.join(path_i,os.listdir(path_i)[i],_comp[i][j]) for i in range(len(_comp))])
-            print(f'   -> INPUT SHAPE [{len(comp_f)}, {len(comp_f[0])}]')
             self.paths = comp_f
             return comp_f
 
@@ -217,6 +217,7 @@ class Data_Loader():
                     anchor_i = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
                     anchor_pos = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
                     anchor_neg = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
+                    print(anchor_i.shape)
                     outputs = model(anchor_i)
                     loss = lf(outputs, model(anchor_pos), model(anchor_neg))
                     loss.backward()
