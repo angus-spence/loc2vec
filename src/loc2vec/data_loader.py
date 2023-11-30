@@ -206,6 +206,7 @@ class Data_Loader():
         #       EXCEPTIONS AS THIS ONLY WORKS IF MEMORY EXCEPTIONS ARE THE ONLY EXCEPTIONS
         #
         #       THIS IS SLIGHTLY BETTER NOW BUT STILL CRAP
+        self._force_cudnn_init()
         model.to(self.device)
         model.train(True)
         lf = tlf()
@@ -241,6 +242,11 @@ class Data_Loader():
         torch.cuda.empty_cache()
         print(f'Optimum batch size: {batch_size}')
         return batch_size
+
+    def _force_cudnn_init(self):
+        s = 32
+        torch.nn.functional.conv2d(torch.zeros(s, s, s, s, device=self.device), torch.zeros(s, s, s, s, device=self.device))
+        torch.cuda.empty_cache()
 
     def _get_samples(self) -> int:
         """
