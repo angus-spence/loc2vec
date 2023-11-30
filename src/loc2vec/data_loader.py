@@ -95,7 +95,6 @@ class Data_Loader():
             anchors: tuple
             tuple of tensor objects for all anchors
         """
-        #TODO: THIS LOADS TO BATCH RATHER THAN CHANNEL, WE NEED TO STACK THESE TO A CHANNEL
         if self._iter_index < len(self) // self.batch_size:
             self._iter_index += self.batch_size
             path = self._get_data_files()
@@ -151,7 +150,7 @@ class Data_Loader():
             for img in channel:
                 counter += 1
                 channels.append(tv.io.read_image(img)[:3,:,:].type(torch.float).to(self.device)) 
-                print(f'LOADED: {counter}/{(self.batch_size*self.in_channels)} @ {round(torch.cuda.memory_allocated()*1e-9, 4)}GB', end='\r') 
+                print(f'LOADED: {counter}/{(self.batch_size*self.in_channels)/3} @ {round(torch.cuda.memory_allocated()*1e-9, 4)}GB', end='\r') 
             t1 = torch.cat(channels)
             batches.append(t1)
         return torch.stack(batches)

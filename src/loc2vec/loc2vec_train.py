@@ -27,7 +27,7 @@ def train():
             del o, plus, neg
 
             running_loss.append(loss.cpu().detach().numpy())
-            print(f'Epoch: {epoch+1}/{Params.EPOCHS.value} - Loss: {round(np.mean(running_loss), 5)}')
+            print(f'Epoch: {epoch+1}/{Params.EPOCHS.value} - Loss: {round(np.mean(running_loss), 3)} - Memory: {round(torch.cuda.memory_allocated()*1e-9,3)}GB', end='\r')
             
 if __name__ == "__main__":
     train()
