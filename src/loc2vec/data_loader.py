@@ -130,7 +130,7 @@ class Data_Loader():
         """
         return len(self) - (len(self) // self.batch_size)
 
-    def _tensor_stack(self, files) -> torch.Tensor:
+    def _tensor_stack(self, batch) -> torch.Tensor:
         """
         Iterates over a list of PNG paths, coverts and stacks Tensors
 
@@ -140,18 +140,15 @@ class Data_Loader():
             Tensor of model input data; this can be for (o) anchor, (+) anchor or (-) anchor sets
         """
         batches = []
-        channels = []
         counter = 0
-        for channel in files:
-            print(channel)
-            for _ in channel:
-                print(_)
+        for channel in batch:
+            channels = []
+            for img in channel:
                 counter += 1
-                channels.append(tv.io.read_image(channel[index])[:3,:,:].type(torch.float).to(self.device)) 
+                channels.append(tv.io.read_image(img)[:3,:,:].type(torch.float).to(self.device)) 
                 print(f'LOADED: {counter}/{(self.batch_size*self.in_channels)} @ {round(torch.cuda.memory_allocated()*1e-9, 4)}GB', end='\r') 
-            t_cat = torch.cat(channels)
-            print(t_cat.shape)
-            batches.append(t_cat)
+            t1 = torch.cat(channels)
+            batches.append(t1)
         t_stack = torch.stack(batches)
         print(t_stack.shape)
         return t_stack
