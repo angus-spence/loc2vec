@@ -148,6 +148,7 @@ class Data_Loader():
                 print(f'LOADED: {counter}/{(self.batch_size*self.in_channels)} @ {round(torch.cuda.memory_allocated()*1e-9, 4)}GB', end='\r') 
                 channels.append(tv.io.read_image(channel[index])[:3,:,:].type(torch.float).to(self.device)) 
             t = torch.cat(channels)
+            print(t.shape)
         batches.append(t)
         return torch.stack(t)
 
@@ -220,7 +221,6 @@ class Data_Loader():
                     anchor_i = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
                     anchor_pos = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
                     anchor_neg = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
-                    print(anchor_i.shape)
                     outputs = model(anchor_i)
                     loss = lf(outputs, model(anchor_pos), model(anchor_neg))
                     loss.backward()
