@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 import numpy as np
 import torch
+import torch.nn.functional as F
 from torch import nn
 from tqdm import tqdm
 
@@ -78,7 +79,17 @@ class TripletLossFunction(nn.Module):
         loss: torch.Tensor
             Tensor output from the Triplet Loss Funciton
         """
-        distance_to_pos = self.calc_euclidean(anchor, anchor_pos)
-        distance_to_neg = self.calc_euclidean(anchor, anchor_neg)
-        losses = torch.relu(distance_to_pos - distance_to_neg + self.margin)
+        distance_a_pos = F.pairwise_distance(anchor, anchor_pos)
+        distance_a_neg = F.pairwise_distance(anchor, anchor_neg)
+        distance_pos_neg = F.pairwise_distance(anchor_pos, anchor_neg)
+        distance_min_neg = torch.min(distance_a_neg, distance_pos_neg)
+        losses = torch.relu(distance_a_pos - distance_min_neg + self.margin)
+        
+        np_losses = losses.cpu().data.numpy()
+        np_distance_a_pos = distance_a_pos.cpu().data.numpy()
+        np_distance_a_neg = distance_a_neg.cpu().data.numpy()
+        np_min_neg_dist = distance_min_neg.cpu().data.numpy()
+
+        # TODO: Add the above to a loss message
+
         return losses.mean()
