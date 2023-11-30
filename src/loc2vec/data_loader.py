@@ -143,10 +143,12 @@ class Data_Loader():
         channels = []
         counter = 0
         for channel in files:
-            for index in range(len(channel)):
+            print(channel)
+            for _ in channel:
+                print(_)
                 counter += 1
-                print(f'LOADED: {counter}/{(self.batch_size*self.in_channels)} @ {round(torch.cuda.memory_allocated()*1e-9, 4)}GB', end='\r') 
                 channels.append(tv.io.read_image(channel[index])[:3,:,:].type(torch.float).to(self.device)) 
+                print(f'LOADED: {counter}/{(self.batch_size*self.in_channels)} @ {round(torch.cuda.memory_allocated()*1e-9, 4)}GB', end='\r') 
             t_cat = torch.cat(channels)
             print(t_cat.shape)
             batches.append(t_cat)
