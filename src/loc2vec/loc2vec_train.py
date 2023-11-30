@@ -1,4 +1,4 @@
-from loc2vec.loc2vec_nn import Network, TripletLossFunction
+from loc2vec.loc2vec_nn import Network, Loc2vec, TripletLossFunction
 from loc2vec.config import Params
 from loc2vec.data_loader import Data_Loader
 
@@ -9,7 +9,8 @@ from tqdm import tqdm
 def train():
     loader = Data_Loader(Params.X_PATH.value, x_pos_path=Params.X_POS_PATH.value)
     device = loader.device
-    model = Network(in_channels=loader.in_channels).to(device)
+    #model = Network(in_channels=loader.in_channels).to(device)
+    model = Loc2vec()
     optimiser = torch.optim.Adam(model.parameters(), lr=Params.LEARNING_RATE.value)
     criterion = TripletLossFunction().to(device)
 
@@ -27,7 +28,8 @@ def train():
             del o, plus, neg
 
             running_loss.append(loss.cpu().detach().numpy())
-            print(f'Epoch: {epoch+1}/{Params.EPOCHS.value} - Loss: {round(np.mean(running_loss), 3)} - Memory: {round(torch.cuda.memory_allocated()*1e-9,3)}GB', end='\r')
-            
+            print(f'Epoch: {epoch+1}/{Params.EPOCHS.value} - Loss: {round(np.mean(running_loss), 3)}', end='\r')
+    torch.save(model, "loc2vec_model")
+
 if __name__ == "__main__":
     train()

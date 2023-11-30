@@ -6,6 +6,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from torch import nn
+from torchvision import models
 from tqdm import tqdm
 
 class Network(torch.nn.Module):
@@ -29,6 +30,19 @@ class Network(torch.nn.Module):
 
     def forward(self, x):
         return self.model(x)
+
+class Loc2vec(nn.Module):
+    """
+    Using pretrained ResNet50
+
+    num_ftrs is taken from surya501's loc2vec implementation
+    """
+    def __init__(self):
+        super(Loc2vec, self).__init__()
+        self.model = models.resnet50(pretrained=True)
+        self.model.avgpool = nn.AvgPool2d(kernel_size=2, stride=1, padding=0)
+        num_ftrs = 18432
+        self.model.fc = nn.Linear(num_ftrs, 16)
 
 class TripletLossFunction(nn.Module):
     """
