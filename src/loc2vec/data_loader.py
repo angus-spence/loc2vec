@@ -130,9 +130,14 @@ class Data_Loader():
         """
         return len(self) - (len(self) // self.batch_size)
 
-    def _tensor_stack(self, batch) -> torch.Tensor:
+    def _tensor_stack(self, batch: list) -> torch.Tensor:
         """
-        Iterates over a list of PNG paths, coverts and stacks Tensors
+        Iterates over a list of PNG paths, converts images to a tensor and stacks to form (batch_size, channels, W, H) dimension Tensor
+
+        Parameters
+        ----------
+        batch: list
+            list of image paths in a batch to be converted to Tensor and then stacked
 
         Returns
         -------
@@ -149,9 +154,7 @@ class Data_Loader():
                 print(f'LOADED: {counter}/{(self.batch_size*self.in_channels)} @ {round(torch.cuda.memory_allocated()*1e-9, 4)}GB', end='\r') 
             t1 = torch.cat(channels)
             batches.append(t1)
-        t_stack = torch.stack(batches)
-        print(t_stack.shape)
-        return t_stack
+        return torch.stack(batches)
 
     def _check_batch_size():
         return
