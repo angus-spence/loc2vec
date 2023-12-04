@@ -17,7 +17,7 @@ def train(model):
         
         for batch in range(loader.batches):
             o, plus, neg = next(loader)
-            if Loc2vec: o, plus, neg = o.view(-1, 3, *loader._image_shape()[1:])
+            if Loc2vec: o, plus, neg = o.view(-1, *loader._image_shape())
             
             o, plus, neg = (model(o), model(plus), model(neg))
 
