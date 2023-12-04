@@ -9,8 +9,8 @@ from tqdm import tqdm
 def train():
     loader = Data_Loader(Params.X_PATH.value, x_pos_path=Params.X_POS_PATH.value)
     device = loader.device
-    model = Network(in_channels=loader.in_channels).to(device)
-    #model = Loc2vec()
+    #model = Network(in_channels=loader.in_channels).to(device)
+    model = Loc2vec()
     optimiser = torch.optim.Adam(model.parameters(), lr=Params.LEARNING_RATE.value)
     criterion = TripletLossFunction().to(device)
 

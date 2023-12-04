@@ -478,4 +478,3 @@ class Data_Loader():
             size *= ele
         
         return size * (dtypes[dtype] * 8), bm * size
-    #self.data = torch.stack([torchvision.io.read_image(os.path.join(path, os.listdir(path)[i]))[:3, :, :] for i in range(len(os.listdir(path)))]).type(torch.float).to(device)

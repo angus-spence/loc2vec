@@ -44,6 +44,10 @@ class Loc2vec(nn.Module):
         num_ftrs = 18432
         self.model.fc = nn.Linear(num_ftrs, 16)
 
+    def forward(self, x): 
+        x = self.model(x)
+        return x
+
 class TripletLossFunction(nn.Module):
     """
     Evaluates triplet loss
