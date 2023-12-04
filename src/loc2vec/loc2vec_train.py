@@ -6,11 +6,9 @@ import torch
 import numpy as np
 from tqdm import tqdm
 
-def train():
+def train(model):
     loader = Data_Loader(Params.X_PATH.value, x_pos_path=Params.X_POS_PATH.value)
     device = loader.device
-    #model = Network(in_channels=loader.in_channels).to(device)
-    model = Loc2vec()
     optimiser = torch.optim.Adam(model.parameters(), lr=Params.LEARNING_RATE.value)
     criterion = TripletLossFunction().to(device)
 
@@ -19,6 +17,8 @@ def train():
         
         for batch in range(loader.batches):
             o, plus, neg = next(loader)
+            if Loc2vec: o, plus, neg = o.view(-1, 3, *loader._image_shape()[1:])
+            
             o, plus, neg = (model(o), model(plus), model(neg))
 
             loss = criterion(o, plus, neg)
@@ -32,4 +32,4 @@ def train():
     torch.save(model, "loc2vec_model")
 
 if __name__ == "__main__":
-    train()
+    train(model=Loc2vec())
