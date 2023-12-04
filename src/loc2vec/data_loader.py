@@ -34,6 +34,7 @@ class Data_Loader():
     """
     x_path: str
     x_pos_path: str
+    model: nn.Module
     batch_size: int = None
     sample_limit: int = None
     x_neg_path: str = None
@@ -67,11 +68,10 @@ class Data_Loader():
         self.in_channels = self._image_shape()[0] * self._get_channels()
 
         if not self.batch_size:
-            print(f'IMAGE SHAPE: {self._image_shape()} CHANNELS: {self._get_channels()} SAMPLES: {self._get_samples()}')
-            model = Network(in_channels=self.in_channels) 
-            self.batch_size = self._optim_batch(model, (self._image_shape()[0] * self._get_channels(), *self._image_shape()[1:]), self._get_samples(), num_iterations=20)
+            print(f'IMAGE SHAPE: {self._image_shape()} CHANNELS: {self._get_channels()} SAMPLES: {self._get_samples()}') 
+            self.batch_size = self._optim_batch(self.model, (self._image_shape()[0] * self._get_channels(), *self._image_shape()[1:]), self._get_samples(), num_iterations=20)
             self._e = self.batch_size
-            del model
+            del self.model
 
         self.batches = (len(self) - self._batch_dropout()) // self.batch_size
 
@@ -209,6 +209,7 @@ class Data_Loader():
         self._force_cudnn_init()
         model.to(self.device)
         model.train(True)
+        
         lf = tlf()
         optimiser = torch.optim.Adam(model.parameters())
         batch_size = 2
@@ -221,9 +222,14 @@ class Data_Loader():
                 break
             try:
                 for _ in tqdm(range(num_iterations), desc="Evaluating optimum batch size"):
-                    anchor_i = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
-                    anchor_pos = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
-                    anchor_neg = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
+                    if str(model.model)[:6]=="ResNet":
+                        anchor_i = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float).view(-1, self._image_shape())
+                        anchor_pos = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float).view(-1, self._image_shape())
+                        anchor_neg = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float).view(-1, self._image_shape())
+                    else:
+                        anchor_i = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
+                        anchor_pos = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
+                        anchor_neg = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
                     outputs = model(anchor_i)
                     loss = lf(outputs, model(anchor_pos), model(anchor_neg))
                     loss.backward()

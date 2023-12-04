@@ -7,7 +7,7 @@ import numpy as np
 from tqdm import tqdm
 
 def train(model: torch.nn.Module):
-    loader = Data_Loader(Params.X_PATH.value, x_pos_path=Params.X_POS_PATH.value)
+    loader = Data_Loader(Params.X_PATH.value, x_pos_path=Params.X_POS_PATH.value, model=Loc2vec())
     device = loader.device
     model.to(device)
     optimiser = torch.optim.Adam(model.parameters(), lr=Params.LEARNING_RATE.value)
