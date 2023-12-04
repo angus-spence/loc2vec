@@ -39,7 +39,7 @@ class Loc2vec(nn.Module):
     """
     def __init__(self):
         super(Loc2vec, self).__init__()
-        self.model = models.resnet50(pretrained=True)
+        self.model = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
         self.model.avgpool = nn.AvgPool2d(kernel_size=2, stride=1, padding=0)
         num_ftrs = 18432
         self.model.fc = nn.Linear(num_ftrs, 16)
