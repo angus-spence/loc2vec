@@ -6,7 +6,7 @@ import torch
 import numpy as np
 from tqdm import tqdm
 
-def train(model: torch.nn.Module):
+def train():
     loader = Data_Loader(Params.X_PATH.value, x_pos_path=Params.X_POS_PATH.value, model=Loc2vec())
     device = loader.device
     model = Network(in_channels=loader.in_channels)
