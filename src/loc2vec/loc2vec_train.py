@@ -9,6 +9,7 @@ from tqdm import tqdm
 def train(model: torch.nn.Module):
     loader = Data_Loader(Params.X_PATH.value, x_pos_path=Params.X_POS_PATH.value, model=Loc2vec())
     device = loader.device
+    model = Network(in_channels=loader.in_channels)
     model.to(device)
     optimiser = torch.optim.Adam(model.parameters(), lr=Params.LEARNING_RATE.value)
     criterion = TripletLossFunction().to(device)
@@ -38,4 +39,4 @@ def train(model: torch.nn.Module):
     torch.save(model, "loc2vec_model")
 
 if __name__ == "__main__":
-    train(model=Network())
+    train()
