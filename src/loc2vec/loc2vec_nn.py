@@ -108,6 +108,6 @@ class TripletLossFunction(nn.Module):
         np_distance_a_neg = distance_a_neg.cpu().data.numpy()
         np_min_neg_dist = distance_min_neg.cpu().data.numpy()
 
-        # TODO: Add the above to a loss message
-
-        return losses.mean()
+        loss_log = f'MAX LOSS: {np.max(np_losses)} | MEAN LOSS: {np.mean(np_losses)} | (o)/(+) DIST: {np.mean(np_distance_a_pos)} | (o)/(-) DIST: {np.mean(np_distance_a_neg)}'
+        
+        return losses.mean(), loss_log

@@ -25,15 +25,17 @@ def train(model: torch.nn.Module):
             
             o, plus, neg = (model(o), model(plus), model(neg))
 
-            loss = criterion(o, plus, neg)
+            loss, loss_summary = criterion(o, plus, neg)
             loss.backward()
             optimiser.step()
 
             del o, plus, neg
 
             running_loss.append(loss.cpu().detach().numpy())
-            print(f'Epoch: {epoch+1}/{Params.EPOCHS.value} - Loss: {round(np.mean(running_loss), 3)}', end='\r')
+            print(f'Epoch: {epoch+1}/{Params.EPOCHS.value} - Loss: {round(np.mean(running_loss), 3)}')
+            print(loss_summary)
+    
     torch.save(model, "loc2vec_model")
 
 if __name__ == "__main__":
-    train(model=Loc2vec())
+    train(model=Network())
