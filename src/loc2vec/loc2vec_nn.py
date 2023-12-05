@@ -101,13 +101,13 @@ class TripletLossFunction(nn.Module):
         distance_a_neg = F.pairwise_distance(anchor, anchor_neg)
         distance_pos_neg = F.pairwise_distance(anchor_pos, anchor_neg)
         distance_min_neg = torch.min(distance_a_neg, distance_pos_neg)
-        losses = torch.relu(distance_a_pos - distance_min_neg + self.margin)
+        losses = F.relu(distance_a_pos - distance_min_neg + self.margin)
         
         np_losses = losses.cpu().data.numpy()
         np_distance_a_pos = distance_a_pos.cpu().data.numpy()
         np_distance_a_neg = distance_a_neg.cpu().data.numpy()
         np_min_neg_dist = distance_min_neg.cpu().data.numpy()
 
-        loss_log = f'MAX LOSS: {np.max(np_losses)} | MEAN LOSS: {np.mean(np_losses)} | (o)/(+) DIST: {np.mean(np_distance_a_pos)} | (o)/(-) DIST: {np.mean(np_distance_a_neg)}'
-        
+        loss_log = f'MAX LOSS: {round(np.max(np_losses),3)} | MEAN LOSS: {round(np.mean(np_losses),3)} | (o)/(+) DIST: {round(np.mean(np_distance_a_pos),3)} | (o)/(-) DIST: {round(np.mean(np_distance_a_neg),3)}'
+
         return losses.mean(), loss_log

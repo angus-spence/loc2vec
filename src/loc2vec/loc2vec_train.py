@@ -12,7 +12,7 @@ def train():
     model = Network(in_channels=loader.in_channels)
     model.to(device)
     optimiser = torch.optim.Adam(model.parameters(), lr=Params.LEARNING_RATE.value)
-    criterion = TripletLossFunction().to(device)
+    criterion = TripletLossFunction(margin=0.5).to(device)
 
     for epoch in tqdm(range(Params.EPOCHS.value), desc='Epochs'):
         running_loss = []
@@ -33,7 +33,7 @@ def train():
             del o, plus, neg
 
             running_loss.append(loss.cpu().detach().numpy())
-            print(f'Batch: {batch+1}/{Params.EPOCHS.value} - Loss: {round(np.mean(running_loss), 3)}')
+            print(f'Batch: {batch+1}/{loader.batches} - Loss: {round(np.mean(running_loss), 3)}')
             print(loss_summary)
     
     torch.save(model, "loc2vec_model")
