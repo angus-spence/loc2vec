@@ -27,6 +27,7 @@ def train():
             o, plus, neg = (model(o), model(plus), model(neg))
 
             loss, loss_summary = criterion(o, plus, neg)
+            print(loss)
             loss.backward()
             optimiser.step()
 
