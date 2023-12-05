@@ -34,7 +34,6 @@ class Data_Loader():
     """
     x_path: str
     x_pos_path: str
-    model: nn.Module
     batch_size: int = None
     sample_limit: int = None
     x_neg_path: str = None
@@ -45,7 +44,6 @@ class Data_Loader():
     _iter_index: int = 0
     _s: int = 0
     _e: int = 0
-
 
     def __post_init__(self):
         """
@@ -68,10 +66,11 @@ class Data_Loader():
         self.in_channels = self._image_shape()[0] * self._get_channels()
 
         if not self.batch_size:
+            model = Network(in_channels=self.in_channels)
             print(f'IMAGE SHAPE: {self._image_shape()} CHANNELS: {self._get_channels()} SAMPLES: {self._get_samples()}') 
-            self.batch_size = self._optim_batch(self.model, (self._image_shape()[0] * self._get_channels(), *self._image_shape()[1:]), self._get_samples(), num_iterations=20)
+            self.batch_size = self._optim_batch(model, (self._image_shape()[0] * self._get_channels(), *self._image_shape()[1:]), self._get_samples(), num_iterations=20)
             self._e = self.batch_size
-            del self.model
+            del model
 
         self.batches = (len(self) - self._batch_dropout()) // self.batch_size
 

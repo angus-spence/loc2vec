@@ -7,7 +7,7 @@ import numpy as np
 from tqdm import tqdm
 
 def train():
-    loader = Data_Loader(Params.X_PATH.value, x_pos_path=Params.X_POS_PATH.value, model=Network())
+    loader = Data_Loader(Params.X_PATH.value, x_pos_path=Params.X_POS_PATH.value)
     device = loader.device
     model = Network(in_channels=loader.in_channels)
     model.to(device)
