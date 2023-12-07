@@ -244,7 +244,8 @@ class Data_Loader():
                         anchor_pos = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
                         anchor_neg = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
                     outputs = model(anchor_i)
-                    loss, loss_summary = lf(outputs, model(anchor_pos), model(anchor_neg))
+                    loss, loss_summary, ap, an, mn = lf(outputs, model(anchor_pos), model(anchor_neg))
+                    del loss_summary, ap, an, mn
                     loss.backward()
                     optimiser.step()
                     optimiser.zero_grad()
