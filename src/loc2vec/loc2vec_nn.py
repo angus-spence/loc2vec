@@ -29,7 +29,7 @@ class Network(torch.nn.Module):
             nn.ReLU(),
             nn.Conv2d(32, 32, 3, stride=1, padding=1),
             nn.PReLU(),
-            nn.Linear(32, 16)
+            nn.Linear(64, 16)
         )
 
     def forward(self, x):

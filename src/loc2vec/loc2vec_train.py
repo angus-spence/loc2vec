@@ -96,4 +96,4 @@ def train(train_limit: int = None, logging: bool = True, plot: bool = False) -> 
         plt.savefig("Loc2vec_plot", dpi=150)
 
 if __name__ == "__main__":
-    train(plot=True, train_limit=25)
+    train(plot=True, logging=True, train_limit=10)
