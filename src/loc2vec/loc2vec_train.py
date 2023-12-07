@@ -81,17 +81,17 @@ def train(train_limit: int = None, logging: bool = True, plot: bool = False) -> 
 
         iters = np.arange(0, len(running_loss), 1)
         
-        fig, ax = plt.subplots(1, 3)
-        ax[0, 0].plot(iters, running_loss)
-        ax[0, 0].set_title("LOSS FUNCTION")
+        fig, ax = plt.subplots(1, 2)
+        ax[0].plot(iters, running_loss)
+        ax[0].set_title("LOSS FUNCTION")
         #ax[0, 1].plot(iters, [running_points[i][0] for i in range(len(iters))])
         #ax[0, 1].plot(iters, [running_points[i][1] for i in range(len(iters))])
         #ax[0, 1].plot(iters, [running_points[i][2] for i in range(len(iters))])
         #ax[0, 1].set_title("")
-        ax[0, 2].plot(iters, ap_log)
-        ax[0, 2].plot(iters, an_log)
-        ax[0, 2].plot(iters, mn_log)
-        ax[0, 2].set_title("EUCLIDEAN DISTANCE BETWEEN TRIPLETS")
+        ax[1].plot(iters, ap_log)
+        ax[1].plot(iters, an_log)
+        ax[1].plot(iters, mn_log)
+        ax[1].set_title("EUCLIDEAN DISTANCE BETWEEN TRIPLETS")
 
         plt.savefig("Loc2vec_plot", dpi=150)
 
