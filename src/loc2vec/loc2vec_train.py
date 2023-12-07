@@ -62,7 +62,7 @@ def train(train_limit: int = None, logging: bool = True, plot: bool = False) -> 
                     print(f'Batch: {batch+1}/{loader.batches} - Running Loss: {round(float(np.mean(running_loss)), 3)}')
                     print(loss_summary)
 
-                idx += 1
+                    idx += 1
 
     torch.save(model, "loc2vec_model")
 
@@ -83,7 +83,7 @@ def train(train_limit: int = None, logging: bool = True, plot: bool = False) -> 
         ax[0, 2].plot(iters, mn_log)
         ax[0, 2].set_title("EUCLIDEAN DISTANCE BETWEEN TRIPLETS")
 
-        plt.show()
+        plt.savefig("Loc2vec_plot")
 
 if __name__ == "__main__":
     train(plot=True, train_limit=25)
