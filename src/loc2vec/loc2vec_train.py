@@ -2,8 +2,6 @@ from loc2vec.loc2vec_nn import Network, Loc2vec, TripletLossFunction
 from loc2vec.config import Params
 from loc2vec.data_loader import Data_Loader
 
-import csv
-
 import torch
 import numpy as np
 from tqdm import tqdm
@@ -50,13 +48,15 @@ def train(train_limit: int = None, logging: bool = True, plot: bool = False) -> 
                 loss.backward()
                 optimiser.step()
 
-                running_points.append([o.cpu().detach().numpy(), plus.cpu().detach().numpy(), neg.cpu().detach().numpy()])
                 running_loss.append(loss.cpu().detach().numpy())
                 ap_log.append(ap)
                 an_log.append(an)
                 mn_log.append(mn)
 
                 del o, plus, neg
+
+                # TODO: RUNNING A SINGLE PNG THROUGH THE MODEL AND GETTING THE EMBEDDINGS, DEMONSTRATING
+                #       HOW THE EMBEDDINGS CHANGES THROUGH THE EPOCHS
 
                 print(f'Batch: {batch+1}/{loader.batches} - Running Loss: {round(float(np.mean(running_loss)), 3)}')
                 print(loss_summary)
