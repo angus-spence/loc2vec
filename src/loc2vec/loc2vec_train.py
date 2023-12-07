@@ -26,7 +26,8 @@ def train(plot: bool = False):
             #    neg = neg.view(-1, *loader._image_shape())
             
             o, plus, neg = (model(o), model(plus), model(neg))
-            running_points.append(o, plus, neg)
+            running_points.append((o, plus, neg))
+            print(running_points[0])
 
             loss, loss_summary = criterion(o, plus, neg)
             loss.backward()
