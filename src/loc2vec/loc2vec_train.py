@@ -69,9 +69,9 @@ def train(train_limit: int = None, logging: bool = True, plot: bool = False) -> 
         import pandas as pd
 
         df = pd.DataFrame({'running_loss': running_loss,
-                           'point_o': [running_points[i][0] for i in len(running_points)],
-                           'point_+': [running_points[i][1] for i in len(running_points)],
-                           'point_-': [running_points[i][2] for i in len(running_points)],
+                           'point_o': [running_points[i][0] for i in range(len(running_points))],
+                           'point_+': [running_points[i][1] for i in range(len(running_points))],
+                           'point_-': [running_points[i][2] for i in range(len(running_points))],
                            'distance_ap': ap_log,
                            'distance_neg': an_log,
                            'distance_mn': mn_log}).to_csv('loc2vec_log')
