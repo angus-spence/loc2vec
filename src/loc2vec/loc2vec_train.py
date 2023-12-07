@@ -51,7 +51,7 @@ def train(train_limit: int = None, logging: bool = True, plot: bool = False) -> 
                     loss.backward()
                     optimiser.step()
 
-                    running_points.append([o.cpu().numpy(), plus.cpu().numpy(), neg.cpu().numpy()])
+                    running_points.append([o.detatch().cpu().numpy(), plus.detatch().cpu().numpy(), neg.detatch().cpu().numpy()])
                     running_loss.append(loss.cpu().detach().numpy())
                     ap_log.append(ap)
                     an_log.append(an)
