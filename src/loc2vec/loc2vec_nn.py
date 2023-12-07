@@ -28,7 +28,7 @@ class Network(torch.nn.Module):
             nn.MaxPool2d(2, stride=2, padding=0),
             nn.ReLU(),
             nn.Conv2d(32, 32, 3, stride=1, padding=1),
-            nn.LeakyReLU()
+            nn.ReLU()
         )
 
     def forward(self, x):

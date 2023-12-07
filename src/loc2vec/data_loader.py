@@ -111,7 +111,21 @@ class Data_Loader():
             return self._tensor_stack(x_out), self._tensor_stack(x_pos_out), self._tensor_stack(x_neg_out)
         else:
             self._iter_index = 0
-            raise StopIteration
+            self._s = 0
+            self._e = self.batch_size
+
+            if not self.x_neg_path: x_neg = random.sample(path, len(path))[:len(self)]
+            else: x_neg = path[len(self)*2:]
+            x = path[:len(self)]
+            x_pos = path[len(self):len(self)*2]
+
+            x_out = x[self._s:self._e]
+            x_pos_out = x_pos[self._s:self._e]
+            x_neg_out = x_neg[self._s:self._e]
+            self._s += self.batch_size
+            self._e += self.batch_size
+
+            return self._tensor_stack(x_out), self._tensor_stack(x_pos_out), self._tensor_stack(x_neg_out)
 
     def __reverse__(self):
         self._batch_index -= self.batch_size
