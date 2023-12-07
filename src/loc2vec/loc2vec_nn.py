@@ -113,4 +113,4 @@ class TripletLossFunction(nn.Module):
 
         loss_log = f'MAX LOSS: {round(float(np.max(np_losses)),3)} | MEAN LOSS: {round(float(np.mean(np_losses)),3)} | (o)/(+) DIST: {round(float(np.mean(np_distance_a_pos)),3)} | (o)/(-) DIST: {round(float(np.mean(np_distance_a_neg)),3)}'
 
-        return losses.mean(), loss_log
+        return losses.mean(), loss_log, distance_a_pos.numpy(), distance_a_neg.numpy(), distance_min_neg.numpy()
