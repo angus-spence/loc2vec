@@ -21,7 +21,7 @@ def train(train_limit: int = None, logging: bool = True, plot: bool = False) -> 
     plot: bool
         Bool for plotting model analytics
     """
-    loader = Data_Loader(Params.X_PATH.value, x_pos_path=Params.X_POS_PATH.value)
+    loader = Data_Loader(x_path=Params.X_PATH.value, x_pos_path=Params.X_POS_PATH.value)
     device = loader.device
     model = Network(in_channels=loader.in_channels)
     model.to(device)
