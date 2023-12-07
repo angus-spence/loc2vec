@@ -28,7 +28,8 @@ class Network(torch.nn.Module):
             nn.MaxPool2d(2, stride=2, padding=0),
             nn.ReLU(),
             nn.Conv2d(32, 32, 3, stride=1, padding=1),
-            nn.ReLU()
+            nn.PReLU(),
+            nn.Linear(32, 16)
         )
 
     def forward(self, x):
@@ -107,9 +108,9 @@ class TripletLossFunction(nn.Module):
         losses = F.relu(distance_a_pos - distance_min_neg + self.margin)
         
         np_losses = losses.cpu().data.numpy()
-        np_distance_a_pos = distance_a_pos.cpu().data.numpy()
-        np_distance_a_neg = distance_a_neg.cpu().data.numpy()
-        np_min_neg_dist = distance_min_neg.cpu().data.numpy()
+        np_distance_a_pos = np.mean(distance_a_pos.cpu().data.numpy())
+        np_distance_a_neg = np.mean(distance_a_neg.cpu().data.numpy())
+        np_min_neg_dist = np.mean(distance_min_neg.cpu().data.numpy())
 
         loss_log = f'MAX LOSS: {round(float(np.max(np_losses)),3)} | MEAN LOSS: {round(float(np.mean(np_losses)),3)} | (o)/(+) DIST: {round(float(np.mean(np_distance_a_pos)),3)} | (o)/(-) DIST: {round(float(np.mean(np_distance_a_neg)),3)}'
 
