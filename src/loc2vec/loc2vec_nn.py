@@ -13,21 +13,22 @@ class Network(torch.nn.Module):
     def __init__(self, in_channels, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.model = nn.Sequential(
-            nn.Dropout2d(0.5),
+            #nn.Dropout2d(0.5),
             nn.Conv2d(in_channels, 64, 1, stride=1, padding=0),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.Conv2d(64, 64, 1, stride=1, padding=0),
             nn.ReLU(),
             nn.Conv2d(64, 128, 3, stride=1, padding=1),
             nn.MaxPool2d(2, stride=2, padding=0),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.Conv2d(128, 64, 3, stride=1, padding=1),
             nn.MaxPool2d(2, stride=2, padding=0),
             nn.ReLU(),
             nn.Conv2d(64, 32, 3, stride=1, padding=1),
             nn.MaxPool2d(2, stride=2, padding=0),
             nn.ReLU(),
-            nn.Conv2d(32, 32, 3, stride=1, padding=1)
+            nn.Conv2d(32, 32, 3, stride=1, padding=1),
+            nn.LeakyReLU()
         )
 
     def forward(self, x):
