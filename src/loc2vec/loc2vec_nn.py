@@ -43,7 +43,7 @@ class Network(torch.nn.Module):
             nn.LeakyReLU(),
             nn.Conv2d(32, 32, 3, stride=2, padding=1),
             nn.PReLU(),
-            nn.Linear(1024, 16)
+            nn.Linear(8192, 16)
         )
 
     def forward(self, x: torch.Tensor):
@@ -78,6 +78,7 @@ class Network(torch.nn.Module):
             x = self.relu_p(x)
             print(x.shape)
             x = self.fc1(x)
+            return x
         else:
             return self.model(x)
 
