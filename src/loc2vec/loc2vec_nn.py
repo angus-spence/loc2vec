@@ -28,7 +28,7 @@ class Network(torch.nn.Module):
             nn.LeakyReLU(),
             nn.Conv2d(32, 32, 3, stride=2, padding=1),
             nn.PReLU(),
-            nn.Linear(15376, 16)
+            nn.Linear(1024, 16)
         )
 
     def forward(self, x):
