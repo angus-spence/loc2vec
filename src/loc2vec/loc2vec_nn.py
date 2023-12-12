@@ -10,7 +10,7 @@ from torchvision import models
 from tqdm import tqdm
 
 class Network(torch.nn.Module):
-    def __init__(self, in_channels, debug=False, *args, **kwargs) -> None:
+    def __init__(self, in_channels, debug=True, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         if debug:
             self.debug = debug
