@@ -12,6 +12,7 @@ from tqdm import tqdm
 class Network(torch.nn.Module):
     def __init__(self, in_channels, debug=True, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+        # HELO CAN YOU COMMIT
         if debug:
             self.debug = debug
             self.dropout = nn.Dropout2d(0.5)
@@ -25,7 +26,7 @@ class Network(torch.nn.Module):
             self.conv4 = nn.Conv2d(128, 64, 3, stride=2, padding=1)
             self.conv5 = nn.Conv2d(64, 32, 3, stride=2, padding=1)
             self.conv6 = nn.Conv2d(32, 32, 3, stride=2, padding=1)
-            self.fc1 = nn.Linear(1024, 16)
+            self.fc1 = nn.Linear(8192, 16)
         else:
             self.model = nn.Sequential(
             nn.Dropout2d(0.5),
