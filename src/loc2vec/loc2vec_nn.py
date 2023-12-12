@@ -10,10 +10,25 @@ from torchvision import models
 from tqdm import tqdm
 
 class Network(torch.nn.Module):
-    def __init__(self, in_channels, *args, **kwargs) -> None:
+    def __init__(self, in_channels, debug=False, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.model = nn.Sequential(
-            #nn.Dropout2d(0.5),
+        if debug:
+            self.debug = debug
+            self.dropout = nn.Dropout2d(0.5)
+            self.relu = nn.ReLU()
+            self.leak_relu = nn.LeakyReLU()
+            self.relu_p = nn.PReLU()
+            self.pool = nn.MaxPool2d(2, stride=2, padding=0)
+            self.conv1 = nn.Conv2d(in_channels, 64, 1, stride=1, padding=1)
+            self.conv2 = nn.Conv2d(64, 64, 1, stride=1, padding=1)
+            self.conv3 = nn.Conv2d(64, 128, 1, stride=1, padding=1)
+            self.conv4 = nn.Conv2d(128, 64, 3, stride=2, padding=1)
+            self.conv5 = nn.Conv2d(64, 32, 3, stride=2, padding=1)
+            self.conv6 = nn.Conv2d(32, 32, 3, stride=2, padding=1)
+            self.fc1 = nn.Linear(1024, 16)
+        else:
+            self.model = nn.Sequential(
+            nn.Dropout2d(0.5),
             nn.Conv2d(in_channels, 64, 1, stride=1, padding=1),
             nn.LeakyReLU(),
             nn.Conv2d(64, 64, 1, stride=1, padding=1),
@@ -31,8 +46,40 @@ class Network(torch.nn.Module):
             nn.Linear(1024, 16)
         )
 
-    def forward(self, x):
-        return self.model(x)
+    def forward(self, x: torch.Tensor):
+        """
+        Forward pass for network
+
+        Parameters
+        ----------
+        x: torch.Tensor
+            Tensor for model input
+        
+        Returns
+        -------
+        x: torch.Tensor
+            Tensor for model output
+        """
+        if self.debug:
+            x = self.dropout(x)
+            x = self.conv1(x)
+            x = self.leak_relu(x)
+            x = self.conv2(x)
+            x = self.relu(x)
+            x = self.conv3(x)
+            x = self.pool(x)
+            x = self.leak_relu(x)
+            x = self.conv4(x)
+            x = self.pool(x)
+            x = self.relu(x)
+            x = self.conv5(x)
+            x = self.leak_relu(x)
+            x = self.conv6(x)
+            x = self.relu_p(x)
+            print(x.shape)
+            x = self.fc1(x)
+        else:
+            return self.model(x)
 
 class Loc2vec(nn.Module):
     """
