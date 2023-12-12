@@ -9,6 +9,8 @@ from torch import nn
 from torchvision import models
 from tqdm import tqdm
 
+#COMMIT THIS IDIOT
+
 class Network(torch.nn.Module):
     def __init__(self, in_channels, debug=True, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -76,15 +78,11 @@ class Network(torch.nn.Module):
             x = self.leak_relu(x)
             x = self.conv6(x)
             x = self.relu_p(x)
-            print(x.shape)
             x = x.view(x.size(0), -1)
-            print(x.shape)
             x = self.fc1(x)
             return x
         else:
             return self.model(x)
-
-# BOP IT
 
 class Loc2vec(nn.Module):
     """
