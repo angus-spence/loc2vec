@@ -235,14 +235,9 @@ class Data_Loader():
                 break
             try:
                 for _ in tqdm(range(num_iterations), desc="Evaluating optimum batch size"):
-                    if str(model.model)[:6]=="ResNet":
-                        anchor_i = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float).view((-1, *self._image_shape()))
-                        anchor_pos = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float).view((-1, *self._image_shape()))
-                        anchor_neg = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float).view((-1, *self._image_shape()))
-                    else:
-                        anchor_i = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
-                        anchor_pos = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
-                        anchor_neg = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
+                    anchor_i = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
+                    anchor_pos = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
+                    anchor_neg = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
                     outputs = model(anchor_i)
                     loss, loss_summary, ap, an, mn = lf(outputs, model(anchor_pos), model(anchor_neg))
                     del loss_summary, ap, an, mn
