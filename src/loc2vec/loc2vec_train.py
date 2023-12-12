@@ -59,7 +59,7 @@ def train(train_limit: int = None, logging: bool = True, plot: bool = False) -> 
                 # TODO: RUNNING A SINGLE PNG THROUGH THE MODEL AND GETTING THE EMBEDDINGS, DEMONSTRATING
                 #       HOW THE EMBEDDINGS CHANGES THROUGH THE EPOCHS
 
-                print(f'Batch: {batch+1}/{loader.batches} - Running Loss: {round(float(np.mean(running_loss)), 3)}')
+                print(f'Batch: {batch} Sample Set: {idx+1}/{loader.batches} - Running Loss: {round(float(np.mean(running_loss)), 3)}')
                 print(loss_summary)
                 idx += 1
             break
