@@ -77,6 +77,8 @@ class Network(torch.nn.Module):
             x = self.conv6(x)
             x = self.relu_p(x)
             print(x.shape)
+            x = x.view(x.size(0), -1)
+            print(x.shape)
             x = self.fc1(x)
             return x
         else:
