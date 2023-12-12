@@ -35,6 +35,7 @@ def train(train_limit: int = None, logging: bool = True, plot: bool = False) -> 
         
         for batch in range(loader.batches):
             idx = 0
+            if train_limit == None: train_limit = int('inf')
             while idx < train_limit:
                 o, plus, neg = next(loader)
                 #if Loc2vec: 
