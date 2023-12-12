@@ -25,8 +25,7 @@ class Network(torch.nn.Module):
             nn.MaxPool2d(2, stride=2, padding=0),
             nn.ReLU(),
             nn.Conv2d(64, 32, 3, stride=2, padding=1),
-            nn.MaxPool2d(3, stride=3, padding=0),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.Conv2d(32, 32, 3, stride=2, padding=1),
             nn.PReLU(),
             nn.Linear(15376, 16)
