@@ -68,14 +68,15 @@ def train(train_limit: int = None, logging: bool = True, plot: bool = False) -> 
     if logging:
         import pandas as pd
 
-        df = pd.DataFrame({'running_loss': running_loss,
-                           'point_o': [running_points[i][0] for i in range(len(running_points))],
-                           'point_+': [running_points[i][1] for i in range(len(running_points))],
-                           'point_-': [running_points[i][2] for i in range(len(running_points))],
+        df_loss = pd.DataFrame({'running_loss': running_loss,
                            'distance_ap': ap_log,
                            'distance_neg': an_log,
-                           'distance_mn': mn_log}).to_csv('loc2vec_log')
-
+                           'distance_mn': mn_log}).to_csv('loc2vec_log.csv')
+        df_emb = pd.DataFrame({
+                           'point_o': [running_points[i][0] for i in range(len(running_points))],
+                           'point_+': [running_points[i][1] for i in range(len(running_points))],
+                           'point_-': [running_points[i][2] for i in range(len(running_points))]}).to_csv('embs.csv')
+    
     if plot:
         import matplotlib.pyplot as plt
 
@@ -96,4 +97,4 @@ def train(train_limit: int = None, logging: bool = True, plot: bool = False) -> 
         plt.savefig("Loc2vec_plot", dpi=150)
 
 if __name__ == "__main__":
-    train(plot=True, logging=True, train_limit=10)
+    train(plot=True, logging=True)
