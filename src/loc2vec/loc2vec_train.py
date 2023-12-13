@@ -6,7 +6,7 @@ import torch
 import numpy as np
 from tqdm import tqdm
 
-def train(train_limit: int = None, logging: bool = True, plot: bool = False) -> None:
+def train(logging: bool = True, plot: bool = False) -> None:
     """
     Training function for loc2vec Model which is saved after upon completion.
 
@@ -28,39 +28,31 @@ def train(train_limit: int = None, logging: bool = True, plot: bool = False) -> 
     optimiser = torch.optim.Adam(model.parameters(), lr=Params.LEARNING_RATE.value)
     criterion = TripletLossFunction(margin=0.5).to(device)
 
-    for epoch in tqdm(range(Params.EPOCHS.value), desc='Epochs'):
+    for epoch in range(Params.EPOCHS.value):
         running_loss = []
         running_points = []
         ap_log, an_log, mn_log = [], [], []
         
+        batch_id = 0
         for batch in range(loader.batches):
-            idx = 0
-            if train_limit == None: train_limit = float('inf')
-            while idx < train_limit:
-                o, plus, neg = next(loader)
-                #if Loc2vec: 
-                #    o = o.view(-1, *loader._image_shape())
-                #    plus = plus.view(-1, *loader._image_shape())
-                #    neg = neg.view(-1, *loader._image_shape())
-
-                o, plus, neg = (model(o), model(plus), model(neg))
-
-                loss, loss_summary, ap, an, mn = criterion(o, plus, neg)
-                loss.backward()
-                optimiser.step()
-
-                running_loss.append(loss.cpu().detach().numpy())
-                ap_log.append(ap)
-                an_log.append(an)
-                mn_log.append(mn)
-
-                # TODO: RUNNING A SINGLE PNG THROUGH THE MODEL AND GETTING THE EMBEDDINGS, DEMONSTRATING
-                #       HOW THE EMBEDDINGS CHANGES THROUGH THE EPOCHS
-
-                print(f'Batch: {batch} Sample Set: {idx+1}/{loader.batches} - Running Loss: {round(float(np.mean(running_loss)), 3)}')
-                print(loss_summary)
-                idx += 1
-            break
+            o, plus, neg = next(loader)
+            #if Loc2vec: 
+            #    o = o.view(-1, *loader._image_shape())
+            #    plus = plus.view(-1, *loader._image_shape())
+            #    neg = neg.view(-1, *loader._image_shape())
+            o, plus, neg = (model(o), model(plus), model(neg))
+            loss, loss_summary, ap, an, mn = criterion(o, plus, neg)
+            loss.backward()
+            optimiser.step()
+            running_loss.append(loss.cpu().detach().numpy())
+            ap_log.append(ap)
+            an_log.append(an)
+            mn_log.append(mn)
+            # TODO: RUNNING A SINGLE PNG THROUGH THE MODEL AND GETTING THE EMBEDDINGS, DEMONSTRATING
+            #       HOW THE EMBEDDINGS CHANGES THROUGH THE EPOCHS -> WE HAVE GPU RAM AVAILABLE FOR THIS
+            print(f'Epoch: {epoch} Sample Set: {batch_id+1}/{loader.batches} - Running Loss: {round(float(np.mean(running_loss)), 3)}')
+            print(loss_summary)
+            batch_id += 1
 
     torch.save(model, "loc2vec_model")
 
