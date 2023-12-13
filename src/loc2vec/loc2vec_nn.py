@@ -1,15 +1,12 @@
-from loc2vec.config import Params
 
-from dataclasses import dataclass
 
 import numpy as np
 import torch
 import torch.nn.functional as F
 from torch import nn
 from torchvision import models
-from tqdm import tqdm
 
-#COMMIT THIS IDIOT
+# POG IT 
 
 class Network(torch.nn.Module):
     def __init__(self, in_channels, debug=True, *args, **kwargs) -> None:
@@ -78,7 +75,6 @@ class Network(torch.nn.Module):
             x = self.leak_relu(x)
             x = self.conv6(x)
             x = self.relu_p(x)
-            print(x.shape)
             x = self.fc1(x)
             return x
         else:
