@@ -77,11 +77,12 @@ class Data_Loader():
     def __len__(self):
         return len(self._get_data_files())//len(self.data_dirs)
     
-    def __call__(self, batch_index) -> (torch.Tensor, torch.Tensor, torch.Tensor):
+    def __call__(self, index) -> (torch.Tensor, torch.Tensor, torch.Tensor):
         """
-        Returns tensor for (o) anchor, (+) anchor and (-) anchor for specific batch index
+        Returns tensor for (o) anchor, (+) anchor and (-) anchor for specific sample index
         """
-    
+        return self._get_data_files()[index]
+
     def __iter__(self):
         return self
 
