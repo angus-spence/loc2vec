@@ -78,7 +78,7 @@ class Network(torch.nn.Module):
             x = self.leak_relu(x)
             x = self.conv6(x)
             x = self.relu_p(x)
-            x = x.view(x.size(0), -1)
+            print(x.shape)
             x = self.fc1(x)
             return x
         else:
