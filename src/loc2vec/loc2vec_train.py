@@ -26,7 +26,7 @@ def train(logging: bool = True, plot: bool = False) -> None:
     model = Network(in_channels=loader.in_channels)
     model.to(device)
     optimiser = torch.optim.Adam(model.parameters(), lr=Params.LEARNING_RATE.value)
-    criterion = TripletLossFunction(margin=0.5).to(device)
+    criterion = TripletLossFunction(margin=1).to(device)
 
     for epoch in range(Params.EPOCHS.value):
         running_loss = []
@@ -48,8 +48,10 @@ def train(logging: bool = True, plot: bool = False) -> None:
             ap_log.append(ap)
             an_log.append(an)
             mn_log.append(mn)
-            # TODO: RUNNING A SINGLE PNG THROUGH THE MODEL AND GETTING THE EMBEDDINGS, DEMONSTRATING
-            #       HOW THE EMBEDDINGS CHANGES THROUGH THE EPOCHS -> WE HAVE GPU RAM AVAILABLE FOR THIS
+
+            # TODO: RUNNING THE SAME PNG THROUGH THE MODEL AND GETTING THE EMBEDDINGS, DEMONSTRATING
+            #       HOW THE EMBEDDINGS CHANGES THROUGH THE EPOCHS -> WE HAVE RAM AVAILABLE FOR THIS
+            
             print(f'Epoch: {epoch} Sample Set: {batch_id+1}/{loader.batches} - Running Loss: {round(float(np.mean(running_loss)), 3)}')
             print(loss_summary)
             batch_id += 1
