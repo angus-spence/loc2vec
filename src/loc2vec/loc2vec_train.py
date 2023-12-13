@@ -54,8 +54,6 @@ def train(train_limit: int = None, logging: bool = True, plot: bool = False) -> 
                 an_log.append(an)
                 mn_log.append(mn)
 
-                del o, plus, neg
-
                 # TODO: RUNNING A SINGLE PNG THROUGH THE MODEL AND GETTING THE EMBEDDINGS, DEMONSTRATING
                 #       HOW THE EMBEDDINGS CHANGES THROUGH THE EPOCHS
 

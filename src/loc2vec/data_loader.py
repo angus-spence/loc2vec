@@ -114,6 +114,7 @@ class Data_Loader():
             self._s = 0
             self._e = self.batch_size
 
+            path = self._get_data_files()
             if not self.x_neg_path: x_neg = random.sample(path, len(path))[:len(self)]
             else: x_neg = path[len(self)*2:]
             x = path[:len(self)]
