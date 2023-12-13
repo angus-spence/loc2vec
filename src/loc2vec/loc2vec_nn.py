@@ -27,7 +27,7 @@ class Network(torch.nn.Module):
             self.conv4 = nn.Conv2d(128, 64, 3, stride=2, padding=1)
             self.conv5 = nn.Conv2d(64, 32, 3, stride=2, padding=1)
             self.conv6 = nn.Conv2d(32, 32, 3, stride=2, padding=1)
-            self.fc1 = nn.Linear(32, 16)
+            self.fc1 = nn.Linear(16, 16)
         else:
             self.model = nn.Sequential(
             nn.Dropout2d(0.5),
