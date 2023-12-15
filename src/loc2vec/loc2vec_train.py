@@ -25,7 +25,7 @@ def train(logging: bool = True, plot: bool = False) -> None:
     device = loader.device
     model = Network(in_channels=loader.in_channels)
     model.to(device)
-    optimiser = torch.optim.Adam(model.parameters(), lr=Params.LEARNING_RATE.value)
+    optimiser = torch.optim.Adam(model.parameters(), lr=1e-6)
     criterion = TripletLossFunction(margin=1).to(device)
 
     for epoch in range(Params.EPOCHS.value):
