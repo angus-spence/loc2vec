@@ -181,13 +181,14 @@ class Data_Loader:
         """
         if self.paths: return self.paths
         else:
+            self._check_samples()
             comp_f = []
             for path_i in self.data_dirs:  
                 _comp = []
                 for root, dirs, files in os.walk(path_i):
                     if files: _comp.append(files)
                 for j in tqdm(range(len(_comp[0])), desc=f"BUILDING PATHS FOR {str(path_i).upper()}"):
-                    comp_f.append([os.path.join(path_i,os.listdir(path_i)[i],_comp[i][j]) for i in range(len(_comp))])
+                    comp_f.append([os.path.join(path_i, os.listdir(path_i)[i], _comp[i][j]) for i in range(len(_comp))])
             self.paths = comp_f
             return comp_f
 
@@ -275,10 +276,12 @@ class Data_Loader:
         Evaluates if sample indicies are equal across paths
         """
         t = []
-        for dir in [f for dir in self._get_locs() for f in dir]:
-            t.append((len(os.listdir(dir))))
-        t_g = groupby(t)
-        return next(t_g, True) and not next(t_g, False), t
+        for path in self.data_dirs:
+            for root, dir, file in os.walk(path):
+                for i in dir: 
+                    t.append({dir[dir.index(i)]: len(os.listdir(os.path.join(path, i)))})
+        print(t)
+        return all(x == t[0] for x in t), t
 
     def _get_locs(self) -> list:
         """
