@@ -11,7 +11,7 @@ import torch
 import torchvision as tv
 
 @dataclass
-class Data_Loader():     
+class Data_Loader:     
     """
     Object for loading data to tensor
 
@@ -159,11 +159,9 @@ class Data_Loader():
             Tensor of model input data; this can be for (o) anchor, (+) anchor or (-) anchor sets
         """
         batches = []
-        counter = 0
         for channel in batch:
             channels = []
             for img in channel:
-                counter += 1
                 channels.append(tv.io.read_image(img)[:3,:,:].type(torch.float).to(self.device)) 
             t1 = torch.cat(channels)
             batches.append(t1)
