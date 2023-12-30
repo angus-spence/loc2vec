@@ -6,7 +6,7 @@ import torch
 import numpy as np
 from tqdm import tqdm
 
-def train(logging: bool = True, plot: bool = False) -> None:
+def train(logging: bool = True, plot: bool = False, reinforce: bool: True) -> None:
     """
     Training function for loc2vec Model which is saved after upon completion.
 

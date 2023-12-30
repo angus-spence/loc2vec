@@ -1,16 +1,23 @@
 from typing import Any
 from loc2vec.loc2vec_nn import Network
-from loc2vec.data_loader import Data_Loader
 from loc2vec.config import Params
 
+import random
 from dataclasses import dataclass
 from itertools import chain
+from itertools import groupby
 
 import os
 import torch
-import torch.nn.functional as F
 import torchvision as tv
+import torch.nn.functional as F
+import pandas as pd
 from tqdm import tqdm
+
+# THIS IMPLEMENTATION IS BAD -> WE DONT NEED TO COMPUTE ALL PAIR
+# WISE DISTANCES BECAUSE THEY WONT ALL BE USED
+# 
+# WE SHOULD JUST IDENTIFY A 'HARD' TRIPLET N% OF THE TIME
 
 @dataclass
 class TripletMiner:
@@ -29,7 +36,7 @@ class TripletMiner:
     sh_ration: float
         ratio of soft / hard triplets to derive
     difficulty: float
-        difficulty of hard triplets
+        difficulty (0 - 1) of hard triplets
     """
     image_dir: str
     model: torch.nn.Module
@@ -39,7 +46,6 @@ class TripletMiner:
 
     def __post_init__(self):
         self.model.load_state_dict(torch.load('src/loc2vec/loc2vec_model', map_location=torch.device(self.device)))
-
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         return self._evaluate_embeddings()
@@ -68,35 +74,83 @@ class TripletMiner:
             elif file: ids.append(file) 
         return ids
 
-    def _path_stack(self):
-        paths, stacker, channels = [], [], []
-        for root, dir, file in os.walk(self.image_dir):
-            if file: paths.append(file)
-            if dir: channels.append(dir)
-        channels = list(chain.from_iterable(channels))
-        print(len(paths))
-        for i in tqdm(range(len(paths))):
-            stacker.append([os.path.join(self.image_dir, channels[j], paths[j][i]) for j in range(len(channels))])
-        print(stacker)
-        return stacker
+    def _check_channels(self) -> bool:
+        """
+        """
+
+    def _get_paths(self): 
+        """
+        """
+        if not self.paths:
+            file_names = []
+            paths = []
+            for root, dirs, files in os.walk(self.image_dir):
+                if files: file_names.append(files)
+            for file_idx in tqdm(range(len(file_names[0])), desc=f'BUILDING PATHS'):
+                paths.append([os.path.join(self.image_dir, os.listdir(self.image_dir)[i], file_names[i][file_idx]) for i in range(len(file_names))])
+            self.paths = paths
+        return self.paths
 
     def _evaluate_embeddings(self):
+        """
+        """
         embs = []
-        for channel in self._path_stack():
-            img_tensor = []
-            img_tensor.append([tv.io.read_image(img)[:3,:,:].type(torch.float).to(self.device) for img in channel])
-            img_tensor = list(chain.from_iterable(img_tensor))
-            tensor_out = torch.cat(img_tensor)
-            print(tensor_out.shape)
-            embs.append(self.model(tensor_out))
+        for channel in tqdm(self._get_paths(), desc=f'EVALUATING EMBEDDINGS'):
+            tensor = torch.cat([tv.io.read_image(i)[:3,:,:].type(torch.float).to(self.device) for i in channel])
+            embs.append(self.model(tensor))
         return embs
-    
+
+    def _pairs_matrix(self):
+        pairs = []
+        for img in self._get_paths():
+            pairs.append([])
+
     def _pairwise_distance_matrix(self):
+        """
+        """
         pwdm = []
-        print(self.embs)
-        for img_x in self.embs:
-            pwdm = torch.stack(pwdm.append([F.pairwise_distance(img_x, i) for i in img_x]))
-        return pwdm
+        for img in self._evaluate_embeddings():
+            pwdm.append(torch.stack(pwdm.append([F.pairwise_distance(img, i) for i in img])))
+        self.pwdm = pwdm
+
+    @staticmethod
+    def var(sample) -> dict:
+        """
+        """
+        vars = []
+        for i in sample:
+            var = (i - sum(sample) / len*sample) ** 2
+            vars.append(var)
+        return dict(zip((i for i in range(len(vars))), vars))
+
+    @staticmethod
+    def outliers_filter(sample: list, z) -> list:
+        """
+        """
+        if len(sample) < 3:
+            raise ValueError(f'Not enough data points')
+        mean = sum(sample) / len(sample)
+        std_dev = (sum((x - mean) ** 2 for x in sample) / len(sample)) ** 0.5
+        vars = [sample.index(x) for x in sample if abs(x - mean) / std_dev < z]
+        return vars
+
+    def _hard(self, head):
+        """
+        """
+        hard_triplet = []
+        if not self.pwdm: self._pairwise_distance_matrix()
+        for distances in self.pwdm:
+            variances = self.var(distances)
+            # NEED TO IMPLEMENT OUTLIER FILTER HERE
+            sort = sorted(variances.items(), key=lambda item: item[1], reverse=True)
+            top = [item[0] for item in sort[:head]]
+            rndm = random.choice(top)
+            hard_triplet.append(rndm)
+        print(hard_triplet)
+        return hard_triplet
+
+    def _soft(self):
+        pass
 
 if __name__ == "__main__":
     miner = TripletMiner(image_dir=r'C:\Users\aspence1\Documents\loc2vec_data\x_pos',
@@ -104,4 +158,4 @@ if __name__ == "__main__":
                          device='cpu', 
                          weights='src/loc2vec/loc2vec_model', 
                          sh_ratio=0.8)
-    print(len(miner._evaluate_embeddings()))
+    print(miner())
