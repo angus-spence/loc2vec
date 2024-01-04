@@ -81,7 +81,9 @@ class TripletMiner:
     def _get_paths(self): 
         """
         """
-        if not self.paths:
+        try:
+            return self.paths
+        except:
             file_names = []
             paths = []
             for root, dirs, files in os.walk(self.image_dir):
