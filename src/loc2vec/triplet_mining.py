@@ -46,6 +46,7 @@ class TripletMiner:
     sh_ratio: float
 
     def __post_init__(self):
+        self.channels, self.samples, self.dimension = self._input_data_spec()
         self.model.to(device)
         self.model.load_state_dict(torch.load(self.weights, map_location=torch.device(self.device)))
         self.batch_size = self._optim_batch(self.model,
@@ -106,6 +107,7 @@ class TripletMiner:
     @embeddings.setter
     def embeddings(self):
         """
+        
         """
         embs = []
         for channel in tqdm(self._get_paths(), desc=f'LOADING IMAGES TO TENRSOR'):
@@ -125,6 +127,8 @@ class TripletMiner:
             number of input channels to the nn
         no_samples: int
             number of image samples
+        image_dimensions: tuple
+            D x W x H of image tensor 
         """
         channels = []
         files = []
@@ -138,24 +142,24 @@ class TripletMiner:
         return self.dimension
     
     @dimension.setter
-    def dimensions(self):
-        return self._ds[2]
+    def dimensions(self, x):
+        self.dimension = x
 
     @property
     def samples(self):
         return self.samples
     
     @samples.setter
-    def samples(self):
-        self.samples = self._ds[1] 
+    def samples(self, x):
+        self.samples = x 
 
     @property
     def channels(self):
         return self.channels
 
     @channels.setter
-    def channels(self):
-        self.channels = self._ds()[0] 
+    def channels(self, x):
+        self.channels = x 
 
     def _optim_batch(self, 
                      model: torch.nn.Module,
