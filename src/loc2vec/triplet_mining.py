@@ -1,4 +1,3 @@
-from typing import Any
 from loc2vec.loc2vec_nn import Network
 from loc2vec.config import Params
 
@@ -6,6 +5,7 @@ import random
 from dataclasses import dataclass
 from itertools import chain
 from itertools import groupby
+from typing import Any
 
 import os
 import torch
@@ -88,7 +88,6 @@ class TripletMiner:
             paths = []
             for root, dirs, files in os.walk(self.image_dir):
                 if files: file_names.append(files)
-                print(file_names)
             for file_idx in tqdm(range(len(file_names[0])), desc=f'BUILDING PATHS'):
                 paths.append([os.path.join(self.image_dir, os.listdir(self.image_dir)[i], file_names[i][file_idx]) for i in range(len(file_names))])
             self.paths = paths
@@ -156,9 +155,13 @@ class TripletMiner:
         pass
 
 if __name__ == "__main__":
+    if torch.cuda.is_available():
+        device='gpu'
+    else:
+        device='cpu'
     miner = TripletMiner(image_dir=Params.X_PATH.value,
                          model=Network(in_channels=15), 
-                         device='cpu', 
+                         device=device, 
                          weights='src/loc2vec/loc2vec_model', 
                          sh_ratio=0.8)
     print(miner())
