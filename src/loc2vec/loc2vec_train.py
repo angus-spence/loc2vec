@@ -6,7 +6,7 @@ import torch
 import numpy as np
 from tqdm import tqdm
 
-def train(logging: bool = True, plot: bool = False, reinforce: bool: True) -> None:
+def train(logging: bool = True, plot: bool = False, reinforce: bool = True) -> None:
     """
     Training function for loc2vec Model which is saved after upon completion.
 
@@ -88,6 +88,9 @@ def train(logging: bool = True, plot: bool = False, reinforce: bool: True) -> No
         ax[1].set_title("EUCLIDEAN DISTANCE BETWEEN TRIPLETS")
 
         plt.savefig("Loc2vec_plot", dpi=150)
+
+    if reinforce:
+        pass
 
 if __name__ == "__main__":
     train(plot=True, logging=True)

@@ -88,6 +88,7 @@ class TripletMiner:
             paths = []
             for root, dirs, files in os.walk(self.image_dir):
                 if files: file_names.append(files)
+                print(file_names)
             for file_idx in tqdm(range(len(file_names[0])), desc=f'BUILDING PATHS'):
                 paths.append([os.path.join(self.image_dir, os.listdir(self.image_dir)[i], file_names[i][file_idx]) for i in range(len(file_names))])
             self.paths = paths
