@@ -135,7 +135,7 @@ class TripletMiner:
         for root, dirs, files in os.walk(self.image_dir):
             if dirs: channels.append(dirs)
             if files: files.append(len(files))
-        self._ds = channels[0], files[0], tuple(tv.io.read_image(self._get_paths()[0][0])[:3,:,:].shape)
+        return channels[0], files[0], tuple(tv.io.read_image(self._get_paths()[0][0])[:3,:,:].shape)
 
     @property
     def dimension(self):
