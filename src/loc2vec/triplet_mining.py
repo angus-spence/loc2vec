@@ -113,7 +113,8 @@ class TripletMiner:
                 a, b = 0, self.batch_size
                 tensor = torch.cat([tv.io.read_image(i)[:3,:,:].type(torch.float).to(self.device) for i in channel[a:b]])
                 embs.append(self.model(tensor))
-                a, b += self.batch_size
+                a += self.batch_size
+                b += self.batch_size
         self.embs = embs
 
     def _input_data_spec(self) -> int:
