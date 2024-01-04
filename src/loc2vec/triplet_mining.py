@@ -156,7 +156,7 @@ class TripletMiner:
         pass
 
 if __name__ == "__main__":
-    miner = TripletMiner(image_dir=r'C:\Users\aspence1\Documents\loc2vec_data\x_pos',
+    miner = TripletMiner(image_dir=Params.X_PATH.value,
                          model=Network(in_channels=15), 
                          device='cpu', 
                          weights='src/loc2vec/loc2vec_model', 
