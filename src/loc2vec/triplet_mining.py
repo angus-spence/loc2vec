@@ -45,7 +45,8 @@ class TripletMiner:
     sh_ratio: float
 
     def __post_init__(self):
-        self.model = self.model.load_state_dict(torch.load(self.weights, map_location=torch.device(self.device))).to(self.device)
+        self.model.to(device)
+        self.model.load_state_dict(torch.load(self.weights, map_location=torch.device(self.device)))
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         return self._evaluate_embeddings()
