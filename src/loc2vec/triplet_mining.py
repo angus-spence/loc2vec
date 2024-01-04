@@ -156,7 +156,7 @@ class TripletMiner:
 
 if __name__ == "__main__":
     if torch.cuda.is_available():
-        device='gpu'
+        device='cuda'
     else:
         device='cpu'
     miner = TripletMiner(image_dir=Params.X_PATH.value,
