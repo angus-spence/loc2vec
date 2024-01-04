@@ -372,8 +372,6 @@ class Data_Loader:
 
     def _image_shape(self) -> tuple:
         """
-        Return the W x H dimension of samples
-
         Returns
         -------
         image_shape: tuple

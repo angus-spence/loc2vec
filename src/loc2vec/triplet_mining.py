@@ -1,5 +1,6 @@
-from loc2vec.loc2vec_nn import Network
+from loc2vec.loc2vec_nn import Network, TripletLossFunction
 from loc2vec.config import Params
+from loc2vec.data_loader import Data_Loader
 
 import random
 from dataclasses import dataclass
@@ -47,9 +48,13 @@ class TripletMiner:
     def __post_init__(self):
         self.model.to(device)
         self.model.load_state_dict(torch.load(self.weights, map_location=torch.device(self.device)))
+        self.batch_size = self._optim_batch(self.model,
+                                            (self.channels * self.dimension[0], self.dimension[1], self.dimension[2]),
+                                            self.samples,
+                                            128)
 
     def __call__(self, *args: Any, **kwds: Any) -> Any:
-        return self._evaluate_embeddings()
+        return self.embeddings
 
     def _strp_ids(self, path: str, splitter: str, pos: int):
         """
@@ -94,14 +99,124 @@ class TripletMiner:
             self.paths = paths
         return self.paths
 
-    def _evaluate_embeddings(self):
+    @property
+    def embeddings(self):
+        return self.embs
+
+    @embeddings.setter
+    def embeddings(self):
         """
         """
         embs = []
-        for channel in tqdm(self._get_paths(), desc=f'EVALUATING EMBEDDINGS'):
-            tensor = torch.cat([tv.io.read_image(i)[:3,:,:].type(torch.float).to(self.device) for i in channel])
-            embs.append(self.model(tensor))
-        return embs
+        for channel in tqdm(self._get_paths(), desc=f'LOADING IMAGES TO TENRSOR'):
+            for batch in (self.samples // self.batch_size) + 1:
+                a, b = 0, self.batch_size
+                tensor = torch.cat([tv.io.read_image(i)[:3,:,:].type(torch.float).to(self.device) for i in channel[a:b]])
+                embs.append(self.model(tensor))
+                a, b += self.batch_size, self.batch_size
+        self.embs = embs
+
+    def _input_data_spec(self) -> int:
+        """
+        Returns
+        -------
+        no_channels: int
+            number of input channels to the nn
+        no_samples: int
+            number of image samples
+        """
+        channels = []
+        files = []
+        for root, dirs, files in os.walk(self.image_dir):
+            if dirs: channels.append(dirs)
+            if files: files.append(len(files))
+        self._ds = channels[0], files[0], tuple(tv.io.read_image(self._get_paths()[0][0])[:3,:,:].shape)
+
+    @property
+    def dimension(self):
+        return self.dimension
+    
+    @dimension.setter
+    def dimensions(self):
+        return self._ds[2]
+
+    @property
+    def samples(self):
+        return self.samples
+    
+    @samples.setter
+    def samples(self):
+        self.samples = self._ds[1] 
+
+    @property
+    def channels(self):
+        return self.channels
+
+    @channels.setter
+    def channels(self):
+        self.channels = self._ds()[0] 
+
+    def _optim_batch(self, 
+                     model: torch.nn.Module,
+                     input_shape: tuple,
+                     samples: int,
+                     max_batch_size: int = None,
+                     num_iterations: int = 6,
+                     headroom_bias: int = None) -> int:
+        """
+        Evaluates optimum batch size if self.batch_size not specified
+        
+        Parameters
+        ----------
+        model: nn.Module
+            Nerual network model
+        input_shape: tuple[int, ...]
+            Shape of single data index
+        samples: int
+            Number of samples
+        max_batch_size: int = None
+            Maximum batch to evaluate
+        num_iterations: int
+            Times to iterate through the model in evaluation
+        headroom_bias: int
+            byte headroom required
+        
+        Returns
+        -------
+        batch_size: int
+            Optimum batch size
+        """
+        self._force_cudnn_init()
+        model.to(self.device)
+        
+        batch_size = 2
+        while True:
+            if max_batch_size is not None and batch_size >= max_batch_size:
+                batch_size = max_batch_size
+            if batch_size >= samples:
+                batch_size = batch_size // 2
+            try:
+                for _ in tqdm(range(num_iterations), desc="EVALUATING OPTIMIUM BATCH SIZE"):
+                    anchor_i = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
+                    outputs = model(anchor_i)
+                    batch_size *= 2
+            except RuntimeError as e:
+                if str(e)[:18] == "CUDA out of memory": 
+                    batch_size //= 2
+                    break
+                else:
+                    print(e)
+                    quit()
+
+        del model
+        torch.cuda.empty_cache()
+        print(f'Optimum batch size: {batch_size}')
+        return batch_size
+
+    def _force_cudnn_init(self):
+        s=32
+        torch.nn.functional.conv2d(torch.zeros(s, s, s, s, device=self.device), torch.zeros(s, s, s, s, device=self.device))
+        torch.cuda.empty_cache()        
 
     def _pairs_matrix(self):
         pairs = []
