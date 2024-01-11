@@ -42,8 +42,8 @@ class SlimLoader:
         files = []
         for root, dirs, files, in os.walk(self.img_dir):
             if dirs: channels.append(len(dirs))
-            if files: files.append(len(files))
-        return channels[0], files[0], tuple(tv.io.read_image(self._get_paths()[0][0])[:3,:,:].shape)
+            if files: files.append(files)
+        return channels[0], len(files[0]), tuple(tv.io.read_image(self._get_paths()[0][0])[:3,:,:].shape)
     
     def _get_paths(self):
         """
