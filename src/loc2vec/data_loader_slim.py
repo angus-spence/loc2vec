@@ -31,7 +31,8 @@ class SlimLoader:
             path = self._get_paths()
             x = path[:len(self)]
             x_out = x[self.s, self.e]
-            self.s, self.e += self.batch_size, self.batch_size
+            self.s += self.batch_size 
+            self.e += self.batch_size
         return self._batch_to_tensor(x_out)
 
     def _input_spec(self) -> Union[int, int, tuple]:
