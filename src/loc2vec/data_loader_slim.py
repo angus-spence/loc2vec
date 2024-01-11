@@ -28,6 +28,8 @@ class SlimLoader:
     def __next__(self) -> torch.Tensor:
         """
         """
+        print(self.s)
+        print(self.e)
         if self.idx < len(self) // self.batch_size:
             self.idx += self.batch_size
             path = self._get_paths()
