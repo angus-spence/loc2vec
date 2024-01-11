@@ -1,3 +1,5 @@
+from loc2vec.config import Params
+
 from typing import Union
 from dataclasses import dataclass
 import os
@@ -15,7 +17,7 @@ class SlimLoader:
 
     def __post_init__(self):
         self.channels, self.images, self.dimensions = self._input_spec()
-        self.idx, self.s, self.e = 0, 0, self.batch_size
+        self.idx, self.s, self.e = (0, 0, self.batch_size)
 
     def __len__(self):
         return self.images
@@ -39,11 +41,11 @@ class SlimLoader:
         """
         """
         channels = []
-        files = []
+        no_files = []
         for root, dirs, files, in os.walk(self.img_dir):
             if dirs: channels.append(len(dirs))
-            if files: files.append(files)
-        return channels[0], len(files[0]), tuple(tv.io.read_image(self._get_paths()[0][0])[:3,:,:].shape)
+            if files: no_files.append(len(files))
+        return channels[0], no_files[0], tuple(tv.io.read_image(self._get_paths()[0][0])[:3,:,:].shape)
     
     def _get_paths(self):
         """
@@ -71,3 +73,12 @@ class SlimLoader:
             batch_tensor = torch.cat(channels)
             batches.append(batch_tensor)
         return torch.stack(batches)
+    
+if __name__ == "__main__":
+    loader = SlimLoader(
+        img_dir=Params.X_PATH.value,
+        shuffle=False,
+        batch_size=4,
+        device='cpu'
+    )
+    print(loader._input_spec())
