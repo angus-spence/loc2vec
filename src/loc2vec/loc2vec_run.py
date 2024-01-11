@@ -28,6 +28,7 @@ def evaluate_embeddings(img_dir: str,
                                      map_location=torch.device(device)))
     
     embs = []
+    print(len(loader))
     for batch in tqdm(range(len(loader)//batch_size)):
         x = next(loader)
         embs.append(model(x))
