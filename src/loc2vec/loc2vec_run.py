@@ -31,7 +31,7 @@ def evaluate_embeddings(img_dir: str,
     embs = []
     for batch in tqdm(range(len(loader)//batch_size)):
         x = next(loader)
-        x = model(x.cpu().detach().numpy())
+        x = model(x).cpu().detach().numpy()
         print(x)
         embs.append(x)
 
@@ -48,5 +48,5 @@ if __name__ == "__main__":
     else: 
         device = 'cpu'
     embs = evaluate_embeddings(Params.X_PATH.value,
-                               batch_size=4,
+                               batch_size=8,
                                device=device)
