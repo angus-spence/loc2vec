@@ -17,7 +17,7 @@ class SlimLoader:
 
     def __post_init__(self):
         self.channels, self.images, self.dimensions = self._input_spec()
-        self.idx, self.s, self.e = (0, 0, self.batch_size)
+        self.idx, self.s, self.e = 0, 0, self.batch_size
 
     def __len__(self):
         return self.images
