@@ -33,10 +33,10 @@ def evaluate_embeddings(img_dir: str,
         x = next(loader)
         embs.append(model(x).cpu().detach().numpy())
 
-    if to_csv:
-        with open('embs', 'w') as f:
-            write = csv.writer(f)
-            write.writerows(embs)
+        if to_csv:
+            with open('embs', 'a') as f:
+                write = csv.writer(f)
+                write.writerows(embs)
     
     return embs
 
