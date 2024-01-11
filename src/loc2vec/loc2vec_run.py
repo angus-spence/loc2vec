@@ -27,9 +27,9 @@ def evaluate_embeddings(img_dir: str,
     model.load_state_dict(torch.load('src/loc2vec/loc2vec_model', 
                                      map_location=torch.device(device)))
     
+    print(len(loader))
+
     embs = []
-    print(loader.images)
-    quit()
     for batch in tqdm(range(len(loader)//batch_size)):
         x = next(loader)
         embs.append(model(x))
