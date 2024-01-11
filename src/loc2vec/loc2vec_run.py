@@ -28,7 +28,8 @@ def evaluate_embeddings(img_dir: str,
 
     for batch in tqdm(range(len(loader)//batch_size)):
         x = next(loader)
-        embs = model(x).reshape(batch_size, 8192)
+        embs = model(x)
+        embs = torch.flatten(embs, start_dim=1)
         embs = x.cpu().detach().numpy().tolist()
         
         if to_csv:
@@ -46,3 +47,5 @@ if __name__ == "__main__":
     embs = evaluate_embeddings(Params.X_PATH.value,
                                batch_size=32,
                                device=device)
+    
+    # HELLO GIT
