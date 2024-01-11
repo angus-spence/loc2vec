@@ -26,18 +26,17 @@ def evaluate_embeddings(img_dir: str,
     model.load_state_dict(torch.load('src/loc2vec/loc2vec_model', 
                                      map_location=torch.device(device)))
 
-    embs = []
+    
     for batch in tqdm(range(len(loader)//batch_size)):
         x = next(loader)
-        x = model(x).reshape(batch_size, 8192)
-        x = x.cpu().detach().numpy().tolist()
-        embs.append(x)
-
+        emb= model(x).reshape(batch_size, 8192)
+        emb = x.cpu().detach().numpy().tolist()
+        
         if to_csv:
             with open('embs', 'a') as f:
                 write = csv.writer(f)
                 write.writerows(embs)
-    
+
     return embs
 
 if __name__ == "__main__":
@@ -46,7 +45,5 @@ if __name__ == "__main__":
     else: 
         device = 'cpu'
     embs = evaluate_embeddings(Params.X_PATH.value,
-                               batch_size=8,
+                               batch_size=32,
                                device=device)
-    
-    # PUSH THIS GIT !!!
