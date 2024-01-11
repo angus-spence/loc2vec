@@ -26,11 +26,10 @@ def evaluate_embeddings(img_dir: str,
     model.load_state_dict(torch.load('src/loc2vec/loc2vec_model', 
                                      map_location=torch.device(device)))
 
-    
     for batch in tqdm(range(len(loader)//batch_size)):
         x = next(loader)
-        emb= model(x).reshape(batch_size, 8192)
-        emb = x.cpu().detach().numpy().tolist()
+        embs = model(x).reshape(batch_size, 8192)
+        embs = x.cpu().detach().numpy().tolist()
         
         if to_csv:
             with open('embs', 'a') as f:
@@ -43,7 +42,7 @@ if __name__ == "__main__":
     if torch.cuda.is_available():
         device = "cuda"
     else: 
-        device = 'cpu'
+        device = "cpu"
     embs = evaluate_embeddings(Params.X_PATH.value,
                                batch_size=32,
                                device=device)
