@@ -8,6 +8,8 @@ from tqdm import tqdm
 import torch
 import torchvision as tv
 
+# HELLO
+
 @dataclass
 class SlimLoader:
     img_dir: str
@@ -28,8 +30,6 @@ class SlimLoader:
     def __next__(self) -> torch.Tensor:
         """
         """
-        print(self.s)
-        print(self.e)
         if self.idx < len(self) // self.batch_size:
             self.idx += self.batch_size
             path = self._get_paths()
@@ -74,7 +74,7 @@ class SlimLoader:
                 channels.append(tv.io.read_image(img)[:3,:,:].type(torch.float).to(self.device))
             batch_tensor = torch.cat(channels)
             batches.append(batch_tensor)
-        return torch.stack(batches)
+        return torch.stack(batches).to(self.device)
     
 if __name__ == "__main__":
     loader = SlimLoader(
