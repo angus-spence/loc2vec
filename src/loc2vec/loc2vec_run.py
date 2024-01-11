@@ -9,8 +9,6 @@ from tqdm import tqdm
 import numpy as np
 import torch
 
-# MAKE A SLIM DATA LOADER!!
-
 def evaluate_embeddings(img_dir: str, 
                         batch_size: int, 
                         device: str, 
@@ -32,7 +30,7 @@ def evaluate_embeddings(img_dir: str,
     for batch in tqdm(range(len(loader)//batch_size)):
         x = next(loader)
         x = model(x).reshape(batch_size, 8192)
-        x = x.cpu().detach().numpy().list()
+        x = x.cpu().detach().numpy().tolist()
         embs.append(x)
 
         if to_csv:
@@ -50,3 +48,5 @@ if __name__ == "__main__":
     embs = evaluate_embeddings(Params.X_PATH.value,
                                batch_size=8,
                                device=device)
+    
+    # PUSH THIS GIT !!!
