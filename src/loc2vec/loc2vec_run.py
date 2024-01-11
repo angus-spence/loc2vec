@@ -24,6 +24,7 @@ def evaluate_embeddings(img_dir: str,
         device=device
     )
     model = Network(in_channels=15)
+    model.to(device)
     model.load_state_dict(torch.load('src/loc2vec/loc2vec_model', 
                                      map_location=torch.device(device)))
 
