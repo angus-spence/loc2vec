@@ -31,8 +31,9 @@ def evaluate_embeddings(img_dir: str,
     embs = []
     for batch in tqdm(range(len(loader)//batch_size)):
         x = next(loader)
-        x = model(x).cpu().detach().numpy()
-        print(x)
+        x = model(x)
+        print(x.shape)
+        x = x.cpu().detach().numpy()
         embs.append(x)
 
         if to_csv:
