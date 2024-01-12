@@ -45,7 +45,5 @@ if __name__ == "__main__":
     else: 
         device = "cpu"
     embs = evaluate_embeddings(Params.X_PATH.value,
-                               batch_size=32,
+                               batch_size=2,
                                device=device)
-    
-    # HELLO GIT

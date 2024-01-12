@@ -23,8 +23,8 @@ class Network(torch.nn.Module):
             self.conv3 = nn.Conv2d(64, 128, 1, stride=1, padding=1)
             self.conv4 = nn.Conv2d(128, 64, 3, stride=2, padding=1)
             self.conv5 = nn.Conv2d(64, 32, 3, stride=2, padding=1)
-            self.conv6 = nn.Conv2d(32, 32, 3, stride=2, padding=1)
-            self.fc1 = nn.Linear(16, 16)
+            self.conv6 = nn.Conv2d(32, 16, 3, stride=2, padding=1)
+            self.fc1 = nn.Linear(8, 4)
         else:
             self.model = nn.Sequential(
             nn.Dropout2d(0.5),
@@ -40,9 +40,9 @@ class Network(torch.nn.Module):
             nn.ReLU(),
             nn.Conv2d(64, 32, 3, stride=2, padding=1),
             nn.LeakyReLU(),
-            nn.Conv2d(32, 32, 3, stride=2, padding=1),
+            nn.Conv2d(32, 16, 3, stride=2, padding=1),
             nn.PReLU(),
-            nn.Linear(32, 16)
+            nn.Linear(8, 4)
         )
 
     def forward(self, x: torch.Tensor):
