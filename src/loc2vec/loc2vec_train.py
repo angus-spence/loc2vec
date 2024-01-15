@@ -56,7 +56,7 @@ def train(logging: bool = True, plot: bool = False, reinforce: bool = True) -> N
             print(loss_summary)
             batch_id += 1
 
-    torch.save(model.state_dict(), "loc2vec_model")
+    torch.save(model.state_dict(), "loc2vec_model_base")
 
     if logging:
         import pandas as pd

@@ -1,6 +1,6 @@
 from loc2vec.loc2vec_nn import Network, TripletLossFunction
 from loc2vec.config import Params
-from loc2vec.data_loader import Data_Loader
+from loc2vec.data_loader_slim import SlimLoader
 
 import random
 from dataclasses import dataclass
@@ -44,6 +44,7 @@ class TripletMiner:
     device: str    
     weights: str
     sh_ratio: float
+    embeddings: list = None
 
     def __post_init__(self):
         self.channels, self.samples, self.dimension = self._input_data_spec()

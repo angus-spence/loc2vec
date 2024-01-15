@@ -37,8 +37,6 @@ def evaluate_embeddings(img_dir: str,
                 write = csv.writer(f)
                 write.writerows(embs)
 
-    return embs
-
 if __name__ == "__main__":
     if torch.cuda.is_available():
         device = "cuda"
