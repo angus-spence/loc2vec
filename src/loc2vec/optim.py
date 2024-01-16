@@ -1,5 +1,6 @@
 from loc2vec.loc2vec_nn import TripletLossFunction
 
+import numpy as np
 import torch
 from tqdm import tqdm
 
@@ -49,3 +50,14 @@ def batch_optimiser(self,
     torch.cuda.empty_cache()
     print(f'Optimum batch size: {batch_size}')
     return batch_size
+
+def pca_dim_reduction(x: torch.Tensor, dims: int, device: str) -> torch.Tensor:
+    """
+    """
+    if device == "cuda":
+        x = x.cpu().detach().numpy()
+    else:
+        x = x.detach().numpy()
+    cov_matrix = np.cov(x)
+    values, vectors = np.linalg.eig(cov_matrix)
+    return torch.Tensor([x.dot(vectors.T[i]) for i in range(dims)]).to(device)
