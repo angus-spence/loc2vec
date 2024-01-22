@@ -1,14 +1,20 @@
 from loc2vec.loc2vec_nn import Network, TripletLossFunction as tlf
+from loc2vec.optim import batch_optimiser
 
 import os
 import random
+from enum import Enum
+from typing import Union
 from itertools import groupby
 from dataclasses import dataclass
 
 from tqdm import tqdm
-from torch import nn
 import torch
 import torchvision as tv
+
+class Combs(Enum):
+    ID = 1
+    VALUES = 2
 
 @dataclass
 class Data_Loader:     
@@ -21,6 +27,8 @@ class Data_Loader:
         String or array-like object of strings of directory paths to x data
     x_pos_path: [str, tuple, list]
         String or array-like object of strings of directory paths to positive anchor data
+    comb_filter: bool
+        Comb input files for non-mataching rasters
     train_tensory_directory: str
         Path to directory where train tensors should be saved
     batch_size: int
@@ -34,6 +42,7 @@ class Data_Loader:
     """
     x_path: str
     x_pos_path: str
+    comb_filter: bool = True
     batch_size: int = None
     sample_limit: int = None
     x_neg_path: str = None
@@ -68,7 +77,7 @@ class Data_Loader:
         if not self.batch_size:
             model = Network(in_channels=self.in_channels)
             print(f'IMAGE SHAPE: {self._image_shape()} CHANNELS: {self._get_channels()} SAMPLES: {self._get_samples()}') 
-            self.batch_size = self._optim_batch(model, (self._image_shape()[0] * self._get_channels(), *self._image_shape()[1:]), self._get_samples(), num_iterations=20)
+            self.batch_size = batch_optimiser(model, (self._image_shape()[0] * self._get_channels(), *self._image_shape()[1:]), self._get_samples(), num_iterations=20)
             self._e = self.batch_size
             del model
 
@@ -192,72 +201,30 @@ class Data_Loader:
             self.paths = comp_f
             return comp_f
 
-    def _optim_batch(self, model: nn.Module, input_shape: tuple, samples: int, max_batch_size: int = None, num_iterations: int = 5, headroom_bias: int = None) -> int:
+    def _comb_filter(self, comb_type: Combs) -> list:
         """
-        Evaluates optimum batch size if self.batch_size not specified
-        
+        Parse through input data files and identify non-common
+        rasters. This can be done through a file ID or through
+        raster channel values.
+
         Parameters
         ----------
-        model: nn.Module
-            Nerual network model
-        input_shape: tuple[int, ...]
-            Shape of single data index
-        samples: int
-            Number of samples
-        max_batch_size: int = None
-            Maximum batch to evaluate
-        num_iterations: int
-            Times to iterate through the model in evaluation
-        headroom_bias: int
-            byte headroom required
-        
+        comb_type: Comb
+            Method used to comb input files in data loader
+
         Returns
         -------
-        batch_size: int
-            Optimum batch size
         """
-        #TODO: THIS NEEDS SOME DEBUGGING -> USING A TRY IS NOT A GOOD IDEA HERE, IDEALLY WE CAN ISOLATE MEMORY
-        #       EXCEPTIONS AS THIS ONLY WORKS IF MEMORY EXCEPTIONS ARE THE ONLY EXCEPTIONS
-        #
-        #       THIS IS SLIGHTLY BETTER NOW BUT STILL CRAP
-        self._force_cudnn_init()
-        model.to(self.device)
-        model.train(True)
-        
-        lf = tlf()
-        optimiser = torch.optim.Adam(model.parameters())
-        batch_size = 2
-        while True:
-            if max_batch_size is not None and batch_size >= max_batch_size:
-                batch_size = max_batch_size
-                break
-            if batch_size >= samples:
-                batch_size = batch_size // 2
-                break
-            try:
-                for _ in tqdm(range(num_iterations), desc="Evaluating optimum batch size"):
-                    anchor_i = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
-                    anchor_pos = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
-                    anchor_neg = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
-                    outputs = model(anchor_i)
-                    loss, loss_summary, ap, an, mn = lf(outputs, model(anchor_pos), model(anchor_neg))
-                    del loss_summary, ap, an, mn
-                    loss.backward()
-                    optimiser.step()
-                    optimiser.zero_grad()
-                    batch_size *= 2
-            except RuntimeError as e:
-                if str(e)[:18] == "CUDA out of memory": 
-                    batch_size //= 2
-                    break
-                else:
-                    print(e)
-                    quit()
-
-        del model, optimiser
-        torch.cuda.empty_cache()
-        print(f'Optimum batch size: {batch_size}')
-        return batch_size
+        if comb_type == Combs.ID:
+            o, p, n = [], [], []
+            for root, dirs, files in os.walk(self.x_path):
+                o.append(files)
+            return 
+        elif comb_type == Combs.VALUES:
+            # TODO: DO THIS BUT WILL BE A WHOLE NEW SCRIPT TO ACHEIVE
+            #       WILL STAY WITH ID FOR NOW
+            return 
+        else: raise ValueError("comb_type out of range")
 
     def _force_cudnn_init(self):
         s = 32
@@ -494,3 +461,69 @@ class Data_Loader:
             size *= ele
         
         return size * (dtypes[dtype] * 8), bm * size
+    
+@dataclass
+class SlimLoader:
+    img_dir: str
+    shuffle: bool
+    batch_size: int
+    device: str
+
+    def __post_init__(self):
+        self.channels, self.images, self.dimensions = self._input_spec()
+        self.idx, self.s, self.e = 0, 0, self.batch_size
+
+    def __len__(self):
+        return self.images
+    
+    def __iter__(self):
+        return self
+
+    def __next__(self) -> torch.Tensor:
+        """
+        """
+        if self.idx < len(self) // self.batch_size:
+            self.idx += self.batch_size
+            path = self._get_paths()
+            x = path[:len(self)]
+            x_out = x[self.s:self.e]
+            self.s += self.batch_size 
+            self.e += self.batch_size
+        return self._batch_to_tensor(x_out)
+
+    def _input_spec(self) -> Union[int, int, tuple]:
+        """
+        """
+        channels = []
+        no_files = []
+        for root, dirs, files, in os.walk(self.img_dir):
+            if dirs: channels.append(len(dirs))
+            if files: no_files.append(len(files))
+        return channels[0], no_files[0], tuple(tv.io.read_image(self._get_paths()[0][0])[:3,:,:].shape)
+    
+    def _get_paths(self):
+        """
+        """
+        try:
+            return self.paths
+        except:
+            file_names = []
+            paths = []
+            for root, dirs, files in os.walk(self.img_dir):
+                if files: file_names.append(files)
+            for file_idx in tqdm(range(len(file_names[0])), desc=f'BUILDING PATHS'):
+                paths.append([os.path.join(self.img_dir, os.listdir(self.img_dir)[i], file_names[i][file_idx]) for i in range(len(file_names))])
+            self.paths = paths
+        return self.paths
+    
+    def _batch_to_tensor(self, batch: list) -> torch.Tensor:
+        """
+        """
+        batches = []
+        for channel in batch:
+            channels = []
+            for img in channel:
+                channels.append(tv.io.read_image(img)[:3,:,:].type(torch.float).to(self.device))
+            batch_tensor = torch.cat(channels)
+            batches.append(batch_tensor)
+        return torch.stack(batches).to(self.device)

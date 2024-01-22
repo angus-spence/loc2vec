@@ -1,6 +1,6 @@
 from loc2vec.loc2vec_nn import Network
 from loc2vec.config import Params
-from loc2vec.data_loader_slim import SlimLoader
+from loc2vec.data_loader import SlimLoader
 from loc2vec.optim import batch_optimiser, pca_dim_reduction
 from loc2vec.loc2vec_run import evaluate_embeddings
 import random
@@ -13,7 +13,6 @@ import os
 import torch
 import torchvision as tv
 import torch.nn.functional as F
-
 
 # THIS IMPLEMENTATION IS BAD -> WE DONT NEED TO COMPUTE ALL PAIR
 # WISE DISTANCES BECAUSE THEY WONT ALL BE USED
@@ -138,8 +137,8 @@ class TripletMiner:
     def _hard(self, head):
         """
         """
-        hard_triplet = []
         if not self.pwdm: self._pairwise_distance_matrix()
+        hard_triplet = []
         for distances in self.pwdm:
             variances = self.var(distances)
             # NEED TO IMPLEMENT OUTLIER FILTER HERE

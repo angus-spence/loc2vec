@@ -1,0 +1,7 @@
+[default]
+EPOCHS = 10
+LEARNING_RATE =0.001
+CHANNELS = 12
+X_PATH = "NA"
+X_POS_PATH = "NA"
+X_NEG_PATH = "NA"
