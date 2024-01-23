@@ -1,11 +1,12 @@
-from loc2vec.loc2vec_nn import Network, TripletLossFunction as tlf
+from loc2vec.loc2vec_nn import Network
+from loc2vec.utils import Config
 from loc2vec.optim import batch_optimiser
 
 import os
 import random
 from enum import Enum
 from typing import Union
-from itertools import groupby
+from itertools import groupby, chain
 from dataclasses import dataclass
 
 from tqdm import tqdm
@@ -90,7 +91,7 @@ class Data_Loader:
         """
         Returns tensor for (o) anchor, (+) anchor and (-) anchor for specific sample index
         """
-        return self._get_data_files()[index]
+        return tv.io.read_image(self._get_data_files()[0][index])[:3,:,:]
 
     def __iter__(self):
         return self
@@ -101,7 +102,7 @@ class Data_Loader:
 
         Returns
         -------
-            anchors: tuple
+        anchors: tuple
             tuple of tensor objects for all anchors
         """
         if self._iter_index < len(self) // self.batch_size:
@@ -125,8 +126,10 @@ class Data_Loader:
             self._e = self.batch_size
 
             path = self._get_data_files()
+            if self.comb_filter:
+                path = [self.comb_filter(i) for i in path]
             if not self.x_neg_path: x_neg = random.sample(path, len(path))[:len(self)]
-            else: x_neg = path[len(self)*2:]
+            else: x_neg = path[len(self)*2:] #TODO: Triplet Miner here?
             x = path[:len(self)]
             x_pos = path[len(self):len(self)*2]
 
@@ -201,7 +204,7 @@ class Data_Loader:
             self.paths = comp_f
             return comp_f
 
-    def _comb_filter(self, comb_type: Combs) -> list:
+    def _comb_filter(self, anchor_files: list, comb_type: Combs) -> list:
         """
         Parse through input data files and identify non-common
         rasters. This can be done through a file ID or through
@@ -209,17 +212,30 @@ class Data_Loader:
 
         Parameters
         ----------
+        anchor_files: list
+            List of files in anchor
+        
         comb_type: Comb
             Method used to comb input files in data loader
 
         Returns
         -------
+        anchor_files: list
+            Filtered list of files in anchor
         """
         if comb_type == Combs.ID:
+            cfg = Config()
+            flt = []
             o, p, n = [], [], []
-            for root, dirs, files in os.walk(self.x_path):
-                o.append(files)
-            return 
+            for path in (cfg.x_path, cfg.x_pos_path, cfg.x_neg_path): 
+                for root, dirs, files in os.walk(path):
+                    flt = flt.append(chain.from_iterable(files))
+            fmax = max(flt.count(i) for i in flt)
+            fname = [i for i in flt if flt.count(i) < fmax]
+            fcomb = []
+            for channel in anchor_files:
+                fcomb.append([i for i in channel if i not in fname])
+            return fcomb
         elif comb_type == Combs.VALUES:
             # TODO: DO THIS BUT WILL BE A WHOLE NEW SCRIPT TO ACHEIVE
             #       WILL STAY WITH ID FOR NOW
