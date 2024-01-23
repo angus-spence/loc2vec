@@ -1,7 +1,8 @@
+import tomllib
+from dataclasses import dataclass
+
 import torch, torchvision
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as ani
 
 def visualise_tensor(tensor: torch.Tensor, ch:int=0, allkernels:bool=False, nrow:int=0, padding:int=1) -> np.ndarray:
     """
@@ -54,3 +55,11 @@ def gpu_compute_memory(model: torch.nn.Module) -> float:
     mem_bufs = sum([buf.nelement()*buf.element_size() for buf in model.buffers()])
     return mem_params + mem_bufs
 
+@dataclass
+class Config:
+    src: str = "./src/loc2vec/config.toml"
+
+    def __post_init__(self):
+        with open("./src/loc2vec/config.toml", "rb") as f:
+            d = tomllib.load(f)
+        self.epochs, self.lr, self.channels, self.x_path, self.x_pos_path, self.x_neg_path = d['default'].values()
