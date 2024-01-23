@@ -23,7 +23,7 @@ def train(logging: bool = True, plot: bool = False, reinforce: bool = True) -> N
         Bool for plotting model analytics
     """
     cfg = Config()
-    loader = Data_Loader(x_path=f'r"C:/{cfg.x_neg_path}"', x_pos_path=f'r"C:/{cfg.x_neg_path}"')
+    loader = Data_Loader(x_path=cfg.x_path, x_pos_path=cfg.x_pos_path)
     device = loader.device
     model = Network(in_channels=loader.in_channels)
     model.to(device)

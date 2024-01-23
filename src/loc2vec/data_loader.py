@@ -70,6 +70,7 @@ class Data_Loader:
         
         if self.x_neg_path: self.data_dirs = [self.x_path, self.x_pos_path, self.x_neg_path]
         else: self.data_dirs = [self.x_path, self.x_pos_path]
+        self._check_paths()
         
         print(f'   -> DEVICE: {self.device}')
 

@@ -63,4 +63,4 @@ class Config:
         with open("./src/loc2vec/config.toml", "rb") as f:
             d = tomllib.load(f)
         self.epochs, self.lr, self.channels = d['training_parameters'].values()
-        self.x_path, self.x_pos_path, self.x_neg_path = d['paths'].values()
+        self.drive, self.x_path, self.x_pos_path, self.x_neg_path = d['paths'].values()
