@@ -1,6 +1,6 @@
 from loc2vec.loc2vec_nn import Network
-from loc2vec.config import Params
-from loc2vec.data_loader_slim import SlimLoader
+from loc2vec.utils import Config
+from loc2vec.data_loader import SlimLoader
 
 import csv
 import os

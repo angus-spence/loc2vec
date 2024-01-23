@@ -1,7 +1,9 @@
-[default]
+[training_parameters]
 EPOCHS = 10
 LEARNING_RATE = 1e-6
 CHANNELS = 12
-X_PATH = "NA"
-X_POS_PATH = "NA"
+
+[paths]
+X_PATH = "Users.aspence1.scripts.loc2vec_data.build_3_channel.i"
+X_POS_PATH = "Users.aspence1.scripts.loc2vec_data.build_3_channel.pos"
 X_NEG_PATH = "NA"
