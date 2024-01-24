@@ -1,8 +1,71 @@
+import os
 import tomllib
 from dataclasses import dataclass
+from typing import Union
 
 import torch, torchvision
 import numpy as np
+
+@dataclass
+class Channel_Validation:
+    """
+    Channel validation for data dirs
+    """
+    anchor_i_path: list
+    anchor_p_path: list
+    anchor_n_path: list
+
+    def __post_init__(self):
+        self.dirs = (self.anchor_i_path,
+                     self.anchor_n_path,
+                     self.anchor_p_path)
+        
+
+
+    def __len__(self):
+        return
+
+    def dimensions(self):
+        no_channels = []
+        no_images = []
+        for path in (self.dirs):
+            for root, dirs, files in os.walk(path):
+                if dirs: no_channels.append(len(dirs))
+                if files: no_images.append(len(files))
+                if no_channels == 1:
+                    smpl = os.path.join(path, dirs[0], files[0])
+                else:
+                    smpl = os.path.join(path, dirs[0], files[0][0])
+        self.channels, self.samples, self.image_dimensions = no_channels, no_images, tuple(torchvision.io.read_image(smpl))
+        return no_channels, no_images, tuple(torchvision.io.read_image(smpl))
+
+    @property
+    def channels(self):
+        return self.dimensions[0]
+
+    @property
+    def samples(self):
+        return self.dimensions[1]
+
+    @property
+    def image_dimensions(self):
+        return self.dimensions[2]
+
+    def squeeze(self, destructive: bool) -> Union[list, list, list]:
+        """
+        """
+
+
+
+@dataclass
+class Config:
+    src: str = "./src/loc2vec/config.toml"
+
+    def __post_init__(self):
+        with open("./src/loc2vec/config.toml", "rb") as f:
+            d = tomllib.load(f)
+        self.epochs, self.lr, self.channels = d['training_parameters'].values()
+        self.drive, self.anchor_i_path, self.anchor_pos_path, self.anchor_neg_path = d['paths'].values()
 
 def visualise_tensor(tensor: torch.Tensor, ch:int=0, allkernels:bool=False, nrow:int=0, padding:int=1) -> np.ndarray:
     """
@@ -54,13 +117,3 @@ def gpu_compute_memory(model: torch.nn.Module) -> float:
     mem_params = sum([param.nelement()*param.element_size() for param in model.parameters()])
     mem_bufs = sum([buf.nelement()*buf.element_size() for buf in model.buffers()])
     return mem_params + mem_bufs
-
-@dataclass
-class Config:
-    src: str = "./src/loc2vec/config.toml"
-
-    def __post_init__(self):
-        with open("./src/loc2vec/config.toml", "rb") as f:
-            d = tomllib.load(f)
-        self.epochs, self.lr, self.channels = d['training_parameters'].values()
-        self.drive, self.x_path, self.x_pos_path, self.x_neg_path = d['paths'].values()

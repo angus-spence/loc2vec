@@ -6,5 +6,5 @@ CHANNELS = 12
 [paths]
 DRIVE = "C"
 X_PATH = "C:/Users/aspence1/scripts/loc2vec_data/build_3_channel/i"
-X_POS_PATH = "C:/Users/aspence1/scripts/loc2vec_data/build_3_channel/pos"
+X_POS_PATH = "C:/Users/aspence1/scripts/loc2vec_data/build_3_channel/plus"
 X_NEG_PATH = "NA"

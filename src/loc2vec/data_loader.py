@@ -127,8 +127,6 @@ class Data_Loader:
             self._e = self.batch_size
 
             path = self._get_data_files()
-            if self.comb_filter:
-                path = [self.comb_filter(i) for i in path]
             if not self.x_neg_path: x_neg = random.sample(path, len(path))[:len(self)]
             else: x_neg = path[len(self)*2:] #TODO: Triplet Miner here?
             x = path[:len(self)]
@@ -205,7 +203,7 @@ class Data_Loader:
             self.paths = comp_f
             return comp_f
 
-    def _comb_filter(self, anchor_files: list, comb_type: Combs) -> list:
+    def _comb_filter(self, anchor_files: list, comb_type: Combs, destructive: bool) -> list:
         """
         Parse through input data files and identify non-common
         rasters. This can be done through a file ID or through
@@ -224,18 +222,30 @@ class Data_Loader:
         anchor_files: list
             Filtered list of files in anchor
         """
+        
+        # MOVE THIS TO A DIFFERENT CLASS
+        
+        print("   -> FILTERING IMAGES BY ID")
         if comb_type == Combs.ID:
-            cfg = Config()
             flt = []
-            o, p, n = [], [], []
-            for path in (cfg.x_path, cfg.x_pos_path, cfg.x_neg_path): 
+            for path in (self.data_dirs): 
                 for root, dirs, files in os.walk(path):
-                    flt = flt.append(chain.from_iterable(files))
+                    if self._get_channels() == 1:
+                        flt.append(files)
+                    else:
+                        flt.append(list(chain.from_iterable(files)))
+                    print(flt)
             fmax = max(flt.count(i) for i in flt)
+            
+            
+            
+            
+            print(fmax)
             fname = [i for i in flt if flt.count(i) < fmax]
             fcomb = []
-            for channel in anchor_files:
+            for channel in tqdm(anchor_files, desc=f"FILTERING"):
                 fcomb.append([i for i in channel if i not in fname])
+            print(f"   -> NEW STRUCTURE: {[len(i) for i in fcomb]}")
             return fcomb
         elif comb_type == Combs.VALUES:
             # TODO: DO THIS BUT WILL BE A WHOLE NEW SCRIPT TO ACHEIVE
@@ -252,7 +262,13 @@ class Data_Loader:
         """
         Return number of samples
         """    
-        if self._check_samples()[0]: return self._check_samples()[1][0]
+        if self._check_samples()[0]: 
+            return self._check_samples()[1][0]
+        elif self._check_samples()[0] == False:
+            x = []
+            for path in self.paths:
+                x.append(self._comb_filter(path, Combs.ID))
+            self.paths = x
         else: raise TypeError(f'Must have equal samples in channel. Check samples in data directories. Got {self._check_samples()[1]}')
 
     def _check_samples(self):
