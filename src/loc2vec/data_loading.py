@@ -72,13 +72,14 @@ class Tensor_Loader:
         batch = []
         for a in self.anchors:
             for c in a.channels:
-                batch.append(c._get_paths()[start:end])
+                batch.append(c.paths[start:end])
         print(batch)
-        
+        # TODO: THIS ISN'T LOADING THE FILES CORRECTLY NEED TO BE CHANNELS
         for anchor in batch:
             for channel in batch:
                 channel_tensor = []
                 for img in channel:
+                    print(img)
                     channel_tensor.append(tv.io.read_image(img)[:3,:,:].type(torch.float).to(self.device))
                 batch.append(torch.cat(channel_tensor))
         return batch
@@ -136,7 +137,7 @@ class Channel(list):
         self._check_path()
         self.samples = [i for i in os.listdir(self.path)]
         self.no_samples = len(self.samples)
-        self.paths = self._get_paths()
+        self = self._get_paths()
 
     def squeeze(self, common: list, destructive: bool) -> None:
         print("   -> IDENTIFYING COMMON IDS")
@@ -152,7 +153,9 @@ class Channel(list):
             self.path = p
 
     def _get_paths(self) -> list:
-        return [os.path.join(self.path, os.listdir(self.path)[i]) for i in range(len(os.listdir(self.path)))]
+        f = os.listdir(self.path)
+        self.paths = [os.path.join(self.path, i) for i in tqdm(f)]
+        return self.paths
 
     def _check_path(self) -> None:
         if os.path.exists(self.path) == False:
