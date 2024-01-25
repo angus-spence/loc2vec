@@ -4,8 +4,7 @@ import numpy as np
 import torch
 from tqdm import tqdm
 
-def batch_optimiser(self,
-                    model: torch.nn.Module,
+def batch_optimiser(model: torch.nn.Module,
                     device: str,
                     input_shape: tuple,
                     no_samples: int,
@@ -16,7 +15,7 @@ def batch_optimiser(self,
     """
     model.to(device)
     model.train(True)
-    lf = TripletLossFunction
+    lf = TripletLossFunction()
     optimiser = torch.optim.Adam(model.parameters())
     batch_size = 2
     while True:
@@ -28,9 +27,9 @@ def batch_optimiser(self,
             break
         try:
             for _ in tqdm(range(no_iterations), desc="Evaluating optimum batch size"):
-                anchor_i = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
-                anchor_pos = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
-                anchor_neg = torch.rand(*(batch_size, *input_shape), device=self.device, dtype=torch.float)
+                anchor_i = torch.rand(*(batch_size, *input_shape), device=device, dtype=torch.float)
+                anchor_pos = torch.rand(*(batch_size, *input_shape), device=device, dtype=torch.float)
+                anchor_neg = torch.rand(*(batch_size, *input_shape), device=device, dtype=torch.float)
                 outputs = model(anchor_i)
                 loss, loss_summary, ap, an, mn = lf(outputs, model(anchor_pos), model(anchor_neg))
                 del loss_summary, ap, an, mn
