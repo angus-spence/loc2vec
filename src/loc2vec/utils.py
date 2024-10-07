@@ -55,8 +55,6 @@ class Channel_Validation:
         """
         """
 
-
-
 @dataclass
 class Config:
     src: str = "./src/loc2vec/config.toml"
@@ -65,9 +63,14 @@ class Config:
         with open("./src/loc2vec/config.toml", "rb") as f:
             d = tomllib.load(f)
         self.epochs, self.lr, self.channels = d['training_parameters'].values()
-        self.drive, self.anchor_i_path, self.anchor_pos_path, self.anchor_neg_path = d['paths'].values()
+        self.drive, self.anchor_i_path, self.anchor_pos_path, self.anchor_neg_path, self.output_path = d['paths'].values()
 
-def visualise_tensor(tensor: torch.Tensor, ch:int=0, allkernels:bool=False, nrow:int=0, padding:int=1) -> np.ndarray:
+def visualise_tensor(tensor: torch.Tensor, 
+                     ch:int=0, 
+                     allkernels:bool=False, 
+                     nrow:int=0, 
+                     padding:int=1
+                     ) -> np.ndarray:
     """
     Returns an array for visualising a tensor
     
@@ -89,9 +92,10 @@ def visualise_tensor(tensor: torch.Tensor, ch:int=0, allkernels:bool=False, nrow
     if allkernels: tensor = tensor.view(n*c, -1, w, h)
     elif c != 3: tensor = tensor[:,ch,:,:].unsqueeze(dim=1)
 
-    rows = np.min((tensor.shape[0]) // nrow + 1, 64)
-    grid = torchvision.utils.make_grid(tensor, nrow=nrow, normalize=True, padding=padding)
-    return grid.numpy().transpose((1,2,0))
+    try: rows = np.min((tensor.shape[0]) // nrow + 1, 64)
+    except: rows = 1
+    grid = torchvision.utils.make_grid(tensor, nrow=rows, normalize=True, padding=padding)
+    return grid.cpu().numpy().transpose((1,2,0))
 
 def embedding_sequencing(embeddings: torch.Tensor) -> np.ndarray:
     """

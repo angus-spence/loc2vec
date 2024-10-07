@@ -1,0 +1,11 @@
+[training_parameters]
+EPOCHS = 25
+LEARNING_RATE = 1e-7
+CHANNELS = 12
+
+[paths]
+DRIVE = "C"
+X_PATH = "C:/Users/aspence1/scripts/loc2vec_data/test_3_channel/i"
+X_POS_PATH = "C:/Users/aspence1/scripts/loc2vec_data/test_3_channel/plus"
+X_NEG_PATH = "NA"
+OUTPUT_PATH = "C:/Users/aspence1/scripts/loc2vec_outputs"

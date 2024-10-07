@@ -1,12 +1,13 @@
 from loc2vec.loc2vec_nn import Network
 from loc2vec.utils import Config
-from loc2vec.data_loader import SlimLoader
+from loc2vec.data_loading import Tensor_Loader
 
 import csv
 import os
+import datetime
+from itertools import chain
 
 from tqdm import tqdm
-import numpy as np
 import torch
 
 def evaluate_embeddings(img_dir: str, 
@@ -15,33 +16,41 @@ def evaluate_embeddings(img_dir: str,
                         to_csv: bool = True) -> list:
     """
     """
-    loader = SlimLoader(
-        img_dir=img_dir,
-        shuffle=False,
-        batch_size=8,
-        device=device
+
+    loader = Tensor_Loader(
+        anchor_i_path=cfg.anchor_i_path,
+        anchor_p_path=cfg.anchor_pos_path,
+        anchor_n_path=None,
+        batch_size=batch_size
     )
-    model = Network(in_channels=15)
+    ids = list(chain.from_iterable([f for (r, d, f) in os.walk(loader.anchors[0].channels[0].path) if f]))
+    ids = [i.removesuffix(".png").removeprefix("output_") for i in ids]
+    model = Network(in_channels=3, debug=False, resnet=True)
     model.to(device)
-    model.load_state_dict(torch.load('src/loc2vec/loc2vec_model', 
+    model.load_state_dict(torch.load('loc2vec_model_3_channel_120324', 
                                      map_location=torch.device(device)))
 
+    itr = 0
     for batch in tqdm(range(len(loader)//batch_size)):
-        x = next(loader)
-        embs = model(x)
+        accident_ids = ids[itr:itr+batch_size]
+        try: i, p, n, valid = next(loader)
+        except: continue
+        embs = model(i)
         embs = torch.flatten(embs, start_dim=1)
-        embs = x.cpu().detach().numpy().tolist()
-        
+        embs = embs.cpu().detach().numpy().tolist()
+
         if to_csv:
-            with open('embs', 'a') as f:
+            with open(os.path.join(cfg.output_path, f'embs_{str(datetime.date.today())}.csv'), 'a', newline='') as f:
                 write = csv.writer(f)
-                write.writerows(embs)
+                for row in embs:   
+                    row.insert(0, accident_ids[embs.index(row)])
+                    write.writerow(row)
+        itr += batch_size
 
 if __name__ == "__main__":
-    if torch.cuda.is_available():
-        device = "cuda"
-    else: 
-        device = "cpu"
-    embs = evaluate_embeddings(Params.X_PATH.value,
-                               batch_size=2,
+    cfg = Config()
+    if torch.cuda.is_available(): device = "cuda"
+    else: device = "cpu"
+    embs = evaluate_embeddings(cfg.anchor_i_path,
+                               batch_size=64,
                                device=device)
